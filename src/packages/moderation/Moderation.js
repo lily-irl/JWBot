@@ -38,17 +38,6 @@ export default class Moderation {
          */
         this._eventBus = eventBus;
 
-        /**
-         * The ID of the moderation network that this
-         * guild is currently part of, or `null` if
-         * none exists
-         *
-         * @property network
-         * @type {String}
-         * @default null
-         */
-        this.network = null;
-
         this.enable();
     }
 
