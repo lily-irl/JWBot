@@ -1,0 +1,19 @@
+{
+  "name": "jwbot",
+  "version": "1.0.0",
+  "description": "a rewrite of JWBot, mhoc's moderation bot",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/lily-irl/JWBot.git"
+  },
+  "author": "lily-irl",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/lily-irl/JWBot/issues"
+  },
+  "homepage": "https://github.com/lily-irl/JWBot#readme"
+}
