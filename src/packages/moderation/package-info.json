@@ -1,0 +1,12 @@
+{
+    "name": "Moderation",
+    "version": "1.0.0",
+    "description": "Moderation utilities for JWBot",
+    "main": "Moderation.js",
+    "commands": [
+        "kick",
+        "ban",
+        "mute",
+        "moderation"
+    ]
+}

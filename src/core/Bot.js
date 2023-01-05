@@ -1,5 +1,8 @@
-import EventBus from "./event/EventBus";
-import PackageManager from "./PackageManager";
+import Database from "./Database.js";
+import EventBus from "./event/EventBus.js";
+import PackageManager from "./PackageManager.js";
+import CommandManager from "./CommandManager.js";
+import { Events } from "discord.js";
 /**
  * The main Bot class. This doesn't instantiate discord.js but
  * it should be passed all of the requisite objects and run the
@@ -31,5 +34,26 @@ export default class Bot {
          * @private
          */
         this._client = client;
+
+        /**
+         * The database connection.
+         *
+         * @property _database
+         * @private
+         */
+        this._database = Database;
+
+        this.enable();
+    }
+
+    /**
+     *
+     * @method enable
+     * @param {String} token
+     * @returns {void}
+     */
+    enable() {
+        this._database.enable();
+        this._client.on(Events.InteractionCreate, CommandManager.handleInteraction);
     }
 }

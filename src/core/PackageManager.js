@@ -32,3 +32,5 @@ class PackageManager {
         this._packages = [];
     }
 }
+
+export default new PackageManager();

@@ -1,4 +1,4 @@
-import Event from "./Event";
+import Event from "./Event.js";
 /**
  * The event bus is responsible for handling events.
  * It is created by the core and is passed to packages:
