@@ -34,7 +34,9 @@ export const execute = async (interaction, eventBus, database) => {
 
         database.query(`UPDATE Servers SET network = ? WHERE id = '${guild}';`, async (error, results, fields) => {
             if (error) {
+                console.error(error);
                 await interaction.reply({ content: 'A database error occurred while attempting to update the ModerationNetwork', ephemeral: true });
+                return;
             }
 
             await interaction.reply({ content: `Set this server's moderation network to ${name}` });
@@ -44,7 +46,9 @@ export const execute = async (interaction, eventBus, database) => {
 
         database.query(`UPDATE Servers SET network = NULL WHERE id = '${guild}';`, async (error, results, fields) => {
             if (error) {
+                console.error(error);
                 await interaction.reply({ content: 'A database error occurred while attempting to update the ModerationNetwork', ephemeral: true });
+                return;
             }
 
             await interaction.reply({ content: 'Cleared this server\'s moderation network.' });
@@ -54,7 +58,9 @@ export const execute = async (interaction, eventBus, database) => {
 
         database.query(`SELECT network FROM Servers WHERE id = '${guild}';`, async (error, results, fields) => {
             if (error) {
+                console.error(error);
                 await interaction.reply({ content: 'A database error occurred while attempting to query the ModerationNetwork', ephemeral: true });
+                return;
             }
 
             if (results.length === 0 || !results[0].network) {

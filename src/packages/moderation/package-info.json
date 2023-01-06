@@ -4,6 +4,9 @@
     "description": "Moderation utilities for JWBot",
     "main": "Moderation.js",
     "commands": [
-        "ban"
+        "ban",
+        "mute",
+        "muterole",
+        "unmute"
     ]
 }

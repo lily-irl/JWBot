@@ -142,10 +142,9 @@ export default class CommandManager {
      * after all modules have been loaded.
      *
      * @method registerCommands
-     * @param {String[]} commandNames
      */
-    registerCommands(commandNames) {
-        if (!commandNames) return;
+    registerCommands() {
+        const commandNames = this._commands.keys();
 
         const clientId = config.DISCORD.CLIENT_ID;
         const token = config.DISCORD.TOKEN;

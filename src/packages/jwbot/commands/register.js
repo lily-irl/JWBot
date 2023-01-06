@@ -1,5 +1,4 @@
 import { SlashCommandBuilder } from "discord.js";
-import CommandManager from "../../../core/CommandManager.js";
 
 export const data = new SlashCommandBuilder()
     .setName('register')

@@ -2,20 +2,20 @@ import { SlashCommandBuilder } from "discord.js";
 import timespan from "timespan-parser";
 
 export const data = new SlashCommandBuilder()
-    .setName('ban')
-    .setDescription('Bans a user from every server in this network')
+    .setName('mute')
+    .setDescription('Mutes a user from every server in this network')
     .addUserOption(option => {
         return option.setName('user')
-            .setDescription('The user to ban')
+            .setDescription('The user to mute')
             .setRequired(true);
     })
     .addStringOption(option => {
         return option.setName('duration')
-            .setDescription('The amount of time the user should be banned, if temporary');
+            .setDescription('The amount of time the user should be muted, if temporary');
     })
     .addStringOption(option => {
         return option.setName('reason')
-            .setDescription('The reason this user is banned');
+            .setDescription('The reason this user is muted');
     });
 
 /**
@@ -41,10 +41,10 @@ export const execute = async (interaction, eventBus, database) => {
         expires = new Date(current + duration);
         
         if (expires < current + 60 * 1000) {
-            await interaction.reply({ content: 'A ban must be at least 1 minute long', ephemeral: true });
+            await interaction.reply({ content: 'A mute must be at least 1 minute long', ephemeral: true });
             return;
         }
     }
 
-    eventBus.trigger('ban', interaction, target, reason, expires);
+    eventBus.trigger('mute', interaction, target, reason, expires);
 }
