@@ -29,7 +29,7 @@ export const execute = async (interaction, eventBus, database) => {
 
         if (!results || results.length === 0 || !results[0].network) {
             // not in a moderation network
-            eventBus.trigger('kick', target.id, server, reason);
+            eventBus.trigger('kick', interaction.guild.name, target.id, interaction.member.id, server, reason);
             await interaction.reply({ content: `Kicked <@${target.id}> for ${reason}`, ephemeral: true });
         } else {
             database.query(`SELECT id FROM Servers WHERE network = '${results[0].network}';`, async (error, results, fields) => {
@@ -40,7 +40,7 @@ export const execute = async (interaction, eventBus, database) => {
                 }
 
                 for (let result of results) {
-                    eventBus.trigger('kick', target.id, result.id, reason);
+                    eventBus.trigger('kick', interaction.guild.name, target.id, interaction.member.id, result.id, reason);
                 }
 
                 await interaction.reply({ content: `Kicked <@${target.id}> for ${reason}`, ephemeral: true });

@@ -8,6 +8,7 @@
         "mute",
         "muterole",
         "unmute",
-        "kick"
+        "kick",
+        "modlog"
     ]
 }

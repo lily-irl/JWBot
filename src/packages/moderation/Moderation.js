@@ -1,4 +1,4 @@
-import { CommandInteraction, Events } from "discord.js";
+import { CommandInteraction, EmbedBuilder, Events } from "discord.js";
 import Ban from "./Ban.js";
 import Mute from "./Mute.js";
 
@@ -97,12 +97,14 @@ export default class Moderation {
         const unmuteHandler = this.unmuteHandler.bind(this);
         const unbanHandler = this.unbanHandler.bind(this);
         const manualUnbanHandler = this.manualUnbanHandler.bind(this);
+        const logHandler = this.logHandler.bind(this);
 
         this._eventBus.on('mute', muteHandler);
         this._eventBus.on('ban', banHandler);
         this._eventBus.on('kick', kickHandler);
         this._eventBus.on('unban', unbanHandler);
         this._eventBus.on('unmute', unmuteHandler);
+        this._eventBus.on('mod action', logHandler);
 
         this._client.on(Events.GuildBanRemove, manualUnbanHandler);
     }
@@ -306,6 +308,8 @@ export default class Moderation {
                                                         type: 'mute',
                                                         punishment: new Mute(this._eventBus, id, server, reason, expires, oldRoles)
                                                     });
+
+                                                    this._eventBus.trigger('mod action', server, 'mute', interaction.guild.name, id, interaction.user.id, reason, expires);
                                                 
                                                     if (i + 1 === servers.length) 
                                                         await interaction.reply({ content: `Muted user <@${id}> ${expires ? 'until ' + expires.toUTCString() : 'indefinitely'} with reason: ${reason}`, ephemeral: true });
@@ -439,6 +443,8 @@ export default class Moderation {
                                     punishment: new Ban(this._eventBus, id, server, reason, expires)
                                 });
 
+                                this._eventBus.trigger('mod action', server, 'ban', interaction.guild.name, id, interaction.user.id, reason, expires);
+
                                 if (i + 1 === servers.length) 
                                     await interaction.reply({ content: `Banned user <@${id}> ${expires ? 'until ' + expires.toUTCString() : 'indefinitely'} with reason: ${reason}`, ephemeral: true });
                             }, [id, server, reason, expires]);
@@ -465,16 +471,19 @@ export default class Moderation {
      * Handles a kick.
      *
      * @method kickHandler
+     * @param {String} origin - where the kick came from
      * @param {String} id - the user's ID
+     * @param {String} moderator - who kicked the user
      * @param {String} server - the server
      * @param {String} reason - why the user was kicked
      */
-    kickHandler(id, server, reason) {
+    kickHandler(origin, id, moderator, server, reason) {
         this._client.guilds.fetch(server)
             .then(guild => {
                 guild.members.fetch(id)
                     .then(member => {
                         member.kick(reason).catch(error => console.error)
+                        this._eventBus.trigger('mod action', server, 'kick', origin, id, moderator, reason);
                     })
                     .catch(error => console.error);
             })
@@ -510,6 +519,7 @@ export default class Moderation {
                                         if (error) console.log(error);
                                     })
                                     this._punishments.splice(this._punishments.indexOf(mute), 1);
+                                    this._eventBus.trigger('mod action', server, 'unmute', null, id, this._client.user.id);
                                 })
                                 .catch(error => {
                                     console.error(error);
@@ -545,11 +555,11 @@ export default class Moderation {
                 .then(guild => {
                     guild.bans.remove(id)
                         .then(user => {
-                            console.log(user.username + ' unbanned from ' + guild.name);
                             this._database.query(`DELETE FROM Bans WHERE id = '${id}' AND server = '${server}';`, (error, results, fields) => {
                                 if (error) console.error(error);
 
                                 this._punishments = this._punishments.filter(p => !(p.type === 'ban' && p.punishment.id === id && p.punishment.server === server));
+                                this._eventBus.trigger('mod action', server, 'unban', null, id, this._client.user.id);
                             });
                         })
                         .catch(error => console.error);
@@ -572,5 +582,86 @@ export default class Moderation {
                 this._punishments = this._punishments.filter(p => !(p.type === 'ban' && p.punishment.id === ban.user.id && p.punishment.server === ban.guild.id));
             });
         }
+    }
+
+    /**
+     * Logs all moderation actions to the modLog channel.
+     *
+     * @method logHandler
+     * @param {String} server - this server's ID
+     * @param {String} action - 'mute', 'ban', 'kick', 'unmute', 'unban'
+     * @param {String} origin - the server originating this action
+     * @param {String} target - who the action was done to
+     * @param {String} moderator - who the action was done by
+     * @param {String} reason - why the action was done
+     * @param {Date} expires - when the mute/ban expires
+     */
+    logHandler(server, action, origin, target, moderator, reason = null, expires = null) {
+        this._database.query(`SELECT modLog FROM Servers WHERE id = '${server}';`, async (error, results, fields) => {
+            if (error) {
+                console.error(error);
+                return;
+            }
+
+            if (!results || results.length === 0 || !results[0].modLog) {
+                // there's no modLog configured for this server
+                return;
+            }
+
+            try {
+                const guild = await this._client.guilds.fetch(server);
+                const channel = await guild.channels.fetch(results[0].modLog);
+                const user = await guild.members.fetch(target);
+                const mod = await guild.members.fetch(moderator);
+                if (!channel.isTextBased()) return;
+
+                const embed = new EmbedBuilder()
+                    .setAuthor({ name: `[${action.toUpperCase()}] ${user.user.tag}`, iconURL: user.displayAvatarURL() })
+                    .addFields(
+                        { name: 'User', value: '<@' + user.id + '>' },
+                        { name: 'Moderator', value: '<@' + mod.id + '>' }
+                    );
+
+                switch (action) {
+                    case 'mute':
+                        embed.addFields(
+                            { name: 'Reason', value: reason },
+                            { name: 'Originating Server', value: origin }
+                        )
+                        .setColor('#ff0000');
+
+                        if (expires) embed.addFields({ name: '\u200B', value: expires ? '**Expires:** ' + expires : '\u200B' });
+
+                        break;
+                    case 'ban':
+                        embed.addFields(
+                            { name: 'Reason', value: reason },
+                            { name: 'Originating Server', value: origin }
+                        )
+                        .setColor('#ff0000');
+
+                        if (expires) embed.addFields({ name: '\u200B', value: expires ? '**Expires:** ' + expires : '\u200B' });
+
+                        break;
+                    case 'kick':
+                        embed.addFields(
+                            { name: 'Reason', value: reason },
+                            { name: 'Originating Server', value: origin }
+                        )
+                        .setColor('#ff0000');
+                        break;
+                    case 'unmute':
+                    case 'unban':
+                        embed.setColor('#00ff00');
+                        break;
+                    default:
+                        return;
+                }
+
+                channel.send({ embeds: [embed] });
+            } catch (error) {
+                console.error(error);
+            }
+        });
     }
 }
