@@ -167,8 +167,6 @@ export default class PackageManager {
             main: new MainClass(this._client, this._database, this._eventBus)
         });
 
-        //if (this._packages.length === 2) this._commandManager.registerCommands(['ban', 'network']);
-
         console.log(`Package ${info.name} loaded.`);
     }
 }

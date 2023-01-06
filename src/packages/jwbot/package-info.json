@@ -4,6 +4,7 @@
     "description": "Configuration module for JWBot",
     "main": "Configuration.js",
     "commands": [
-        "network"
+        "network",
+        "register"
     ]
 }

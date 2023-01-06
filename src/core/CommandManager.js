@@ -52,6 +52,14 @@ export default class CommandManager {
          */
         this.interactionHandler = null;
 
+        /**
+         * This listens for a signal to register all commands.
+         *
+         * @property registrationListener
+         * @type {Function}
+         */
+        this.registrationListener = null;
+
         this.setupHandlers()
     }
 
@@ -63,6 +71,9 @@ export default class CommandManager {
      */
     setupHandlers() {
         this.interactionHandler = this._handleInteraction.bind(this);
+        this.registrationListener = this.registerCommands.bind(this);
+
+        this._eventBus.on('register commands', this.registrationListener);
     }
 
     /**
