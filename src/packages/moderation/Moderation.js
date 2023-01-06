@@ -116,7 +116,34 @@ export default class Moderation {
      * @returns {void}
      */
     loadExistingBans() {
+        this._database.query('SELECT id, server, reason, expires FROM Bans;', (error, results, fields) => {
+            if (error) console.error(error);
+            if (!results || results.length === 0) return;
+
+            for (let result of results) {
+                let expires;
+
+                if (result.expires) {
+                    expires = new Date(result.expires);
         
+                    if (expires < Date.now()) {
+                        // the ban has expired
+                        this._punishments.push({
+                            type: 'ban',
+                            punishment: new Ban(this._eventBus, result.id, result.server, result.reason)
+                        });
+
+                        this._eventBus.trigger('unban', result.id, result.server);
+                        continue;
+                    }
+                }
+
+                this._punishments.push({
+                    type: 'ban',
+                    punishment: new Ban(this._eventBus, result.id, result.server, result.reason, expires ?? null)
+                });
+            }
+        });
     }
 
     /**
@@ -128,7 +155,34 @@ export default class Moderation {
      * @returns {void}
      */
     loadExistingMutes() {
+        this._database.query('SELECT id, server, reason, expires FROM Mutes;', (error, results, fields) => {
+            if (error) console.error(error);
+            if (!results || results.length === 0) return;
 
+            for (let result of results) {
+                let expires;
+
+                if (result.expires) {
+                    expires = new Date(result.expires);
+        
+                    if (expires < Date.now()) {
+                        // the mute has expired
+                        this._punishments.push({
+                            type: 'mute',
+                            punishment: new Mute(this._eventBus, result.id, result.server, result.reason)
+                        });
+
+                        this._eventBus.trigger('unmute', result.id, result.server);
+                        continue;
+                    }
+                }
+
+                this._punishments.push({
+                    type: 'mute',
+                    punishment: new Mute(this._eventBus, result.id, result.server, result.reason, expires ?? null)
+                });
+            }
+        });
     }
 
     /**

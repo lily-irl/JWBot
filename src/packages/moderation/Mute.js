@@ -15,7 +15,7 @@ export default class Mute {
      * @param {String[]} roles
      * @constructor
      */
-    constructor(eventBus, userId, server, reason, expires = null, roles) {
+    constructor(eventBus, userId, server, reason, expires = null, roles = []) {
         /**
          * The event bus.
          *

@@ -46,4 +46,5 @@ export const execute = async (interaction, eventBus, database) => {
                 await interaction.reply({ content: `Kicked <@${target.id}> for ${reason}`, ephemeral: true });
             });
         }
-    });}
+    });
+}
