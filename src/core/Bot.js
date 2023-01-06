@@ -47,9 +47,19 @@ export default class Bot {
          * The package manager
          *
          * @property _packageManager
+         * @type {PackageManager}
          * @private
          */
         this._packageManager = null;
+
+        /**
+         * The command manager
+         *
+         * @property _commandManager
+         * @type {CommandManager}
+         * @private
+         */
+        this._commandManager = null;
 
         this.enable();
     }
@@ -62,8 +72,11 @@ export default class Bot {
      */
     enable() {
         this._database.enable();
-        this._client.on(Events.InteractionCreate, CommandManager.handleInteraction);
-        this._packageManager = new PackageManager(this._client, this._database, this._eventBus);
+        this._commandManager = new CommandManager(this._eventBus, this._database);
+        this._packageManager = new PackageManager(this._client, this._database, this._eventBus, this._commandManager);
+
+        this._client.on(Events.InteractionCreate, this._commandManager.interactionHandler);
+        this._packageManager.loadPackages();
 
         console.log('JWBot is enabled.')
     }

@@ -49,7 +49,10 @@ export default class Moderation {
      * @returns {void}
      */
     enable() {
-        if (!this._database.ready) return;
+        if (!this._database.ready) {
+            console.log('The database isn\'t ready');
+            return;
+        }
 
         this._database.query('CREATE TABLE IF NOT EXISTS Bans (id VARCHAR(30) PRIMARY KEY, reason VARCHAR(1000), expires VARCHAR(16));',
                             (error, results, fields) => { if (error) console.error(error); });
@@ -80,10 +83,14 @@ export default class Moderation {
         const muteHandler = this.muteHandler.bind(this);
         const banHandler = this.banHandler.bind(this);
         const kickHandler = this.kickHandler.bind(this);
+        const unmuteHandler = this.unmuteHandler.bind(this);
+        const unbanHandler = this.unbanHandler.bind(this);
 
         this._eventBus.on('mute', muteHandler);
         this._eventBus.on('ban', banHandler);
         this._eventBus.on('kick', kickHandler);
+        this._eventBus.on('unban', unbanHandler);
+        this._eventBus.on('unmute', unmuteHandler);
     }
 
     /**
@@ -121,7 +128,7 @@ export default class Moderation {
     }
 
     /**
-     * Handles a ban. Expects a Ban object.
+     * Handles a ban. Expects the ban information.
      *
      * @method banHandler
      * @param {Ban} ban
@@ -137,6 +144,26 @@ export default class Moderation {
      * @param {Kick} kick
      */
     kickHandler(kick) {
+
+    }
+
+    /**
+     * Removes a mute, expects a Mute object.
+     *
+     * @method unmuteHandler
+     * @param {Mute} mute
+     */
+    unmuteHandler(mute) {
+
+    }
+
+    /**
+     * Removes a ban, expects a Ban object.
+     *
+     * @method unbanHandler
+     * @param {Ban} ban
+     */
+    unbanHandler(ban) {
 
     }
 }

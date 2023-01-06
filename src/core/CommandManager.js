@@ -5,12 +5,14 @@ import { default as config } from "../../credentials.json" assert { type: 'json'
  * associated objects. Whenever a package is loaded, its commands
  * will be sent by the PackageManager to the CommandManager
  */
-class CommandManager {
+export default class CommandManager {
     /**
      *
+     * @param {EventBus} eventBus
+     * @param {Database} database
      * @constructor
      */
-    constructor() {
+    constructor(eventBus, database) {
         /**
          * A Collection of every command we currently have
          * registered.
@@ -20,6 +22,47 @@ class CommandManager {
          * @private
          */
         this._commands = new Collection();
+
+        /**
+         * Guess what, we're passing the EventBus to the command handlers
+         *
+         * @property _eventBus
+         * @type {EventBus}
+         * @private
+         */
+        this._eventBus = eventBus;
+
+        /**
+         * The database connection
+         *
+         * @property _database
+         * @type {Database}
+         * @private
+         */
+        this._database = database;
+
+        /**
+         * The interaction handler, a bound function that
+         * MUST be used instead of calling _handleInteraction()
+         * directly.
+         *
+         * @property interactionHandler
+         * @type {Function}
+         * @async
+         */
+        this.interactionHandler = null;
+
+        this.setupHandlers()
+    }
+
+    /**
+     * Creates the interaction handler
+     *
+     * @method setupHandlers
+     * @returns {void}
+     */
+    setupHandlers() {
+        this.interactionHandler = this._handleInteraction.bind(this);
     }
 
     /**
@@ -42,18 +85,33 @@ class CommandManager {
      */
     add(name, command) {
         this._commands.set(name, command);
+        console.log('Added command ' + name);
     }
 
     /**
      * Whenever an Interaction is received from the discord client,
      * we'll process it as a slash command here.
      *
-     * @method handleInteraction
+     * @method _handleInteraction
      * @param {Interaction} interaction
+     * @async
      */
-    handleInteraction(interaction) {
+    async _handleInteraction(interaction) {
         if (!interaction.isChatInputCommand()) return;
-        console.log(interaction);
+        
+        const command = this._commands.get(interaction.commandName);
+
+        if (!command) {
+            console.error(`No command matching ${interaction.commandName} was found.`);
+		    return;
+        }
+
+        try {
+            await command.execute(interaction, this._eventBus, this._database);
+        } catch (err) {
+            console.error(err);
+            await interaction.reply({ content: 'There was an internal error while executing this command', ephemeral: true });
+        }
     }
 
     /**
@@ -89,7 +147,7 @@ class CommandManager {
             } catch (err) {
                 console.error(err);
             }
-        });
+        })();
     }
 
     /**
@@ -120,5 +178,3 @@ class CommandManager {
         });
     }
 }
-
-export default new CommandManager();

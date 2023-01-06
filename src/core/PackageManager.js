@@ -66,8 +66,6 @@ export default class PackageManager {
          * @private
          */
         this._packages = [];
-
-        console.log(this.findPackages())
     }
 
     /**
@@ -99,7 +97,9 @@ export default class PackageManager {
 
         return packages.map(p => {
             const json = fs.readFileSync(path.join(packageRoot, p, "package-info.json"));
-            return JSON.parse(json);
+            const info = JSON.parse(json);
+            info.path = path.join(packageRoot, p);
+            return info;
         })
     }
 
@@ -115,7 +115,10 @@ export default class PackageManager {
      * @returns {void}
      */
     loadPackages() {
-
+        const packages = this.findPackages();
+        for (let p of packages) {
+            this.loadPackage(p);
+        }
     }
 
     /**
@@ -124,7 +127,46 @@ export default class PackageManager {
      * @method loadPackage
      * @param {Object} info
      */
-    loadPackage(info) {
+    async loadPackage(info) {
+        console.log(`Loading package ${info.name}...`);
+
+        // Load commands
+        if (info.commands.length > 0) {
+            for (let cmd of info.commands) {
+                const commandPath = url.pathToFileURL(path.join(info.path, 'commands', cmd + '.js'));
+                let command;
+
+                try {
+                    command = await import(commandPath);
+                } catch (error) {
+                    console.error(error);
+                    return;
+                }
+
+                if ('data' in command && 'execute' in command) {
+                    this._commandManager.add(cmd, command);
+                }
+            }
+        }
+
+        // Load main file
+        const mainPath = url.pathToFileURL(path.join(info.path, info.main));
+        let pkg;
+
+        try {
+            pkg = await import(mainPath);
+        } catch (error) {
+            console.error(error);
+            return;
+        }
         
+        const MainClass = pkg.default;
+
+        this._packages.push({
+            info: info,
+            main: new MainClass(this._client, this._eventBus, this._database)
+        });
+
+        console.log(`Package ${info.name} loaded.`);
     }
 }

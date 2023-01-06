@@ -88,8 +88,4 @@ export default class Ban {
     get expires() {
         return this._expires;
     }
-
-    set reason(nextReason) {
-        
-    }
 }

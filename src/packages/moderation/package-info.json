@@ -4,9 +4,6 @@
     "description": "Moderation utilities for JWBot",
     "main": "Moderation.js",
     "commands": [
-        "kick",
-        "ban",
-        "mute",
-        "moderation"
+        "ban"
     ]
 }
