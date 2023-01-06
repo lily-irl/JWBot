@@ -5,7 +5,7 @@ import Bot from "./core/Bot.js";
 /**
  * Application entry point
  */
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent ]})
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.MessageContent, GatewayIntentBits.GuildBans ]})
 
 client.once(Events.ClientReady, c => {
     const bot = new Bot(client);

@@ -101,6 +101,17 @@ export default class CommandManager {
         
         const command = this._commands.get(interaction.commandName);
 
+        // Ensure there's a database entry for this server
+        this._database.query(`SELECT id FROM Servers WHERE id = '${interaction.guildId}'`, (error, results, fields) => {
+            if (error) console.error(error);
+
+            if (results.length === 0) {
+                this._database.query('INSERT INTO Servers (id) VALUES (?)', (error, results, fields) => {
+                    if (error) console.error(error);
+                }, interaction.guildId);
+            }
+        });
+
         if (!command) {
             console.error(`No command matching ${interaction.commandName} was found.`);
 		    return;

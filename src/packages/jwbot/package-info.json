@@ -1,0 +1,9 @@
+{
+    "name": "Configuration",
+    "version": "1.0.0",
+    "description": "Configuration module for JWBot",
+    "main": "Configuration.js",
+    "commands": [
+        "network"
+    ]
+}

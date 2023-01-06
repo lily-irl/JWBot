@@ -29,6 +29,23 @@ export const execute = async (interaction, eventBus, database) => {
     const target = interaction.options.getUser('user');
     const reason = interaction.options.getString('reason') ?? 'No reason provided.';
     let duration = interaction.options.getString('duration') ?? 0;
+    let expires = null;
 
-    await interaction.reply({ content: `Ban ${target.username} for ${duration ?? "ever"} for ${reason}`})
+    if (duration !== 0) {
+        try {
+            duration = timespan.parse(duration, 'ms');
+        } catch (error) {
+            await interaction.reply({ content: `Couldn't coerce '${interaction.options.getString('duration')}' into a timespan, valid options are listed at https://www.npmjs.com/package/timespan-parser`, ephemeral: true });
+            return;
+        }
+        const current = Date.now();
+        expires = new Date(current + duration);
+        
+        if (expires < current + 60 * 1000) {
+            await interaction.reply({ content: 'A ban must be at least 1 minute long', ephemeral: true });
+            return;
+        }
+    }
+
+    eventBus.trigger('ban', interaction, target, reason, expires);
 }

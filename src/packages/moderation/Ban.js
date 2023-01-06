@@ -7,40 +7,40 @@ import schedule from "node-schedule";
 export default class Ban {
     /**
      *
-     * @param {Client} client
-     * @param {Database} database
+     * @param {EventBus} eventBus
      * @param {String} userId
+     * @param {String} server
      * @param {String} reason
      * @param {Date} expires
      * @constructor
      */
-    constructor(client, database, userId, reason = "", expires = null) {
+    constructor(eventBus, userId, server, reason, expires = null) {
         /**
-         * The discord client.
+         * The event bus.
          *
-         * @property _client
-         * @type {Client}
+         * @property _eventBus
+         * @type {EventBus}
          * @private
          */
-        this._client = client;
+        this._eventBus = eventBus;
 
         /**
-         * The database connection.
-         *
-         * @property _database
-         * @type {Database}
-         * @private
-         */
-        this._database = database;
-
-        /**
-         * The ID of the User who was banned.
+         * The ID of the banned user
          *
          * @property _id
          * @type {String}
          * @private
          */
         this._id = userId;
+
+        /**
+         * The ID of the server the user is banned from
+         *
+         * @property _server
+         * @type {String}
+         * @private
+         */
+        this._server = server;
 
         /**
          * The reason this user was banned, if any.
@@ -61,6 +61,14 @@ export default class Ban {
          */
         this._expires = expires;
 
+        /**
+         * The scheduler job to unban the user
+         *
+         * @property _job
+         * @private
+         */
+        this._job = null;
+
         this.enable();
     }
 
@@ -71,7 +79,11 @@ export default class Ban {
      * @returns {void}
      */
     enable() {
-
+        if (this._expires) {
+            this._job = schedule.scheduleJob(this._expires, function () {
+                this._eventBus.trigger('unban', this._id, this._server);
+            }.bind(this));
+        }
     }
 
     // Getters and setters follow
@@ -87,5 +99,9 @@ export default class Ban {
 
     get expires() {
         return this._expires;
+    }
+
+    get server() {
+        return this._server;
     }
 }
