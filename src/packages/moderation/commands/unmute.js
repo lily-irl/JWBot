@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
     .setName('unmute')
@@ -8,7 +8,8 @@ export const data = new SlashCommandBuilder()
             .setName('user')
             .setDescription('The user to be unmuted.')
             .setRequired(true);
-    });
+    })
+    .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers);
 
 export const execute = async (interaction, eventBus, database) => {
     const target = interaction.options.getUser('user');

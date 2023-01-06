@@ -1,4 +1,4 @@
-import { ChannelType, SlashCommandBuilder } from "discord.js";
+import { ChannelType, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
     .setName('modlog')
@@ -20,7 +20,8 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(subcommand => {
         return subcommand.setName('query')
             .setDescription('Returns this server\'s current mod log');
-    });
+    })
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 /**
  * 

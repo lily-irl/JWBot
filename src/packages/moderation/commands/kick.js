@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
     .setName('kick')
@@ -13,7 +13,8 @@ export const data = new SlashCommandBuilder()
         return option
             .setName('reason')
             .setDescription('The reason why the user is being kicked');
-    });
+    })
+    .setDefaultMemberPermissions(PermissionFlagsBits.KickMembers | PermissionFlagsBits.BanMembers);
 
 export const execute = async (interaction, eventBus, database) => {
     const target = interaction.options.getUser('user');

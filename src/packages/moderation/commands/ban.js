@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 import timespan from "timespan-parser";
 
 export const data = new SlashCommandBuilder()
@@ -16,7 +16,8 @@ export const data = new SlashCommandBuilder()
     .addStringOption(option => {
         return option.setName('reason')
             .setDescription('The reason this user is banned');
-    });
+    })
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers);
 
 /**
  * 

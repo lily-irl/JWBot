@@ -1,4 +1,4 @@
-import { SlashCommandBuilder } from "discord.js";
+import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
     .setName('muterole')
@@ -19,7 +19,8 @@ export const data = new SlashCommandBuilder()
     .addSubcommand(subcommand => {
         return subcommand.setName('query')
             .setDescription('Returns this server\'s current muted role');
-    });
+    })
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 /**
  * 
