@@ -13,24 +13,45 @@ export const data = new SlashCommandBuilder()
 export const execute = async (interaction, eventBus, database) => {
     const target = interaction.options.getUser('user');
     const server = interaction.guildId;
-    const queryString = `SELECT id, server FROM Mutes WHERE id = ? AND server IN (SELECT id FROM Servers WHERE network IN (SELECT network FROM Servers WHERE id = '${server}'));`;
 
-    database.query(queryString, async (error, results, fields) => {
+    database.query(`SELECT network FROM Servers WHERE id = '${server}';`, async (error, results, fields) => {
         if (error) {
             console.error(error);
             await interaction.reply({ content: 'A database error occurred while trying to unmute the user', ephemeral: true });
             return;
         }
 
-        if (!results || results.length === 0) {
-            await interaction.reply({ content: `<@${target.id}> isn't muted.` });
-            return;
-        }
+        if (!results || results.length === 0 || !results[0].network) {
+            // not in a moderation network
+            database.query(`SELECT id FROM Mutes WHERE id = ? AND server = '${server}';`, async (error, results, fields) => {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
 
-        for (let result of results) {
-            eventBus.trigger('unmute', result.id, result.server);
-        }
+                if (!results || results.length === 0) {
+                    // the user isn't muted
+                    await interaction.reply({ content: `<@${target.id}> isn't muted.` });
+                    return;
+                }
 
-        await interaction.reply({ content: `Unmuted <@${target.id}>.` });
+                eventBus.trigger('unmute', target.id, server);
+                await interaction.reply({ content: `Unmuted <@${target.id}>.` });
+            }, target.id);
+        } else {
+            const queryString = `SELECT id, server FROM Mutes WHERE id = ? AND server IN (SELECT id FROM Servers WHERE network = '${results[0].network}');`;
+            database.query(queryString, async (error, results, fields) => {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+
+                for (let result of results) {
+                    eventBus.trigger('unmute', result.id, result.server);
+                }
+                
+                await interaction.reply({ content: `Unmuted <@${target.id}>.` });
+            }, target.id);
+        }
     }, target.id);
 }

@@ -408,13 +408,23 @@ export default class Moderation {
     }
 
     /**
-     * Handles a kick. Expects a Kick object.
+     * Handles a kick.
      *
      * @method kickHandler
-     * @param {Kick} kick
+     * @param {String} id - the user's ID
+     * @param {String} server - the server
+     * @param {String} reason - why the user was kicked
      */
-    kickHandler(kick) {
-
+    kickHandler(id, server, reason) {
+        this._client.guilds.fetch(server)
+            .then(guild => {
+                guild.members.fetch(id)
+                    .then(member => {
+                        member.kick(reason).catch(error => console.error)
+                    })
+                    .catch(error => console.error);
+            })
+            .catch(error => console.error);
     }
 
     /**

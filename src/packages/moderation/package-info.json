@@ -7,6 +7,7 @@
         "ban",
         "mute",
         "muterole",
-        "unmute"
+        "unmute",
+        "kick"
     ]
 }
