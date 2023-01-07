@@ -56,7 +56,7 @@ export const execute = async (interaction, eventBus, database) => {
     } else if (interaction.options.getSubcommand() === 'query') {
         const guild = interaction.guildId;
 
-        database.query(`SELECT modLog FROM Servers WHERE id = '${guild}';`, async (error, results, fields) => {
+        database.query(`SELECT blacklistLog FROM Servers WHERE id = '${guild}';`, async (error, results, fields) => {
             if (error) {
                 await interaction.reply({ content: 'A database error occurred while attempting to query the blacklistLog', ephemeral: true });
             }

@@ -1,0 +1,9 @@
+{
+    "name": "Oversight",
+    "version": "1.0.0",
+    "description": "1984 was a warning, not a manual",
+    "main": "Oversight.js",
+    "commands": [
+        "messagelog"
+    ]
+}

@@ -1,7 +1,7 @@
 {
     "name": "Blacklist",
     "version": "1.0.0",
-    "description": "Word blacklist (literally 1984)",
+    "description": "Logs the use of words on a blacklist",
     "main": "Blacklist.js",
     "commands": [
         "blacklistlog",
