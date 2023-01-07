@@ -1,0 +1,10 @@
+{
+    "name": "Blacklist",
+    "version": "1.0.0",
+    "description": "Word blacklist (literally 1984)",
+    "main": "Blacklist.js",
+    "commands": [
+        "blacklistlog",
+        "blacklist"
+    ]
+}
