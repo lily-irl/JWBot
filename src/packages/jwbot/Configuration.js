@@ -46,7 +46,7 @@ export default class Configuration {
      */
     enable() {
         // Create the Server table if it doesn't already exist
-        this._database.query('CREATE TABLE IF NOT EXISTS Servers (id VARCHAR(30) PRIMARY KEY);', (error, results, fields) => {
+        this._database.query('CREATE TABLE IF NOT EXISTS Servers (id VARCHAR(30) PRIMARY KEY) DEFAULT CHARSET = utf8mb4 DEFAULT COLLATE = utf8mb4_unicode_ci;', (error, results, fields) => {
             if (error) console.error(error);
         });
         this._database.query('ALTER TABLE Servers ADD `network` VARCHAR(50);',

@@ -1,0 +1,9 @@
+{
+    "name": "Pinboard",
+    "version": "1.0.0",
+    "description": "Tracks the least funny people on the server",
+    "main": "Pinboard.js",
+    "commands": [
+        
+    ]
+}

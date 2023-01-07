@@ -60,7 +60,8 @@ class Database {
             host: config.MYSQL.HOST,
             user: config.MYSQL.USER,
             password: config.MYSQL.PASSWORD,
-            database: config.MYSQL.DATABASE
+            database: config.MYSQL.DATABASE,
+            charset: 'utf8mb4'
         });
 
         this._connection.connect();

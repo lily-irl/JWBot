@@ -118,7 +118,8 @@ export default class CommandManager {
 
             if (results.length === 0) {
                 this._database.query('INSERT INTO Servers (id) VALUES (?)', (error, results, fields) => {
-                    if (error) console.error(error);
+                    if (error) return console.error(error);
+                    this._eventBus.trigger('new server', interaction.guildId);
                 }, interaction.guildId);
             }
         });
