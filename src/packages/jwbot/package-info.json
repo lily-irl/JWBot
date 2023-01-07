@@ -5,6 +5,7 @@
     "main": "Configuration.js",
     "commands": [
         "network",
-        "register"
+        "register",
+        "packages"
     ]
 }

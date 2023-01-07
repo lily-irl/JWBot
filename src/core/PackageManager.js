@@ -66,6 +66,31 @@ export default class PackageManager {
          * @private
          */
         this._packages = [];
+
+        this.setupHandlers()
+    }
+
+    /**
+     * Handles a request for package information.
+     *
+     * @method setupHandlers
+     * @returns {void}
+     */
+    setupHandlers() {
+        const infoHandler = this.getPackages.bind(this);
+        this._eventBus.on('package info', infoHandler)
+    }
+
+    /**
+     * Gets packages.
+     * A function instead of a getter in order to allow binding.
+     *
+     * @method getPackages
+     * @param {Function} callback
+     * @returns {Package[]}
+     */
+    getPackages(callback) {
+        callback(this._packages);
     }
 
     /**
