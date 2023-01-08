@@ -118,11 +118,22 @@ export default class Moderation {
      * @returns {void}
      */
     loadExistingBans() {
-        this._database.query('SELECT id, server, reason, expires FROM Bans;', (error, results, fields) => {
+        this._database.query('SELECT id, server, reason, expires FROM Bans;', async (error, results, fields) => {
             if (error) console.error(error);
             if (!results || results.length === 0) return;
 
             for (let result of results) {
+                const guild = await this._client.guilds.fetch(result.server);
+                try {
+                    await guild.members.fetch(result.id);
+                } catch (error) {
+                    // the member left the guild
+                    this._database.query(`DELETE FROM Bans WHERE id = '${result.id}' AND server = '${result.server}';`, (error, results, fields) => {
+                        if (error) console.error(error);
+                    });
+                    continue;
+                }
+
                 let expires;
 
                 if (result.expires) {
@@ -157,11 +168,22 @@ export default class Moderation {
      * @returns {void}
      */
     loadExistingMutes() {
-        this._database.query('SELECT id, server, reason, expires FROM Mutes;', (error, results, fields) => {
+        this._database.query('SELECT id, server, reason, expires FROM Mutes;', async (error, results, fields) => {
             if (error) console.error(error);
             if (!results || results.length === 0) return;
 
             for (let result of results) {
+                const guild = await this._client.guilds.fetch(result.server);
+                try {
+                    await guild.members.fetch(result.id);
+                } catch (error) {
+                    // the member left the guild
+                    this._database.query(`DELETE FROM Mutes WHERE id = '${result.id}' AND server = '${result.server}';`, (error, results, fields) => {
+                        if (error) console.error(error);
+                    });
+                    continue;
+                }
+
                 let expires;
 
                 if (result.expires) {
@@ -279,9 +301,6 @@ export default class Moderation {
 
                 if (!results || results.length === 0 || !results[0].muteRole) {
                     console.log('server ' + server + ' has no mute role set up');
-                    if (i + 1 == servers.length) {
-                        await interaction.reply({ content: 'One or more servers in this moderation network has no mute role.', ephemeral: true });
-                    }
                     return;
                 }
 
@@ -289,8 +308,6 @@ export default class Moderation {
 
                 this._client.guilds.fetch(server)
                     .then(async guild => {
-                        const members = await guild.members.list()
-                        if (!members.has(id)) return;
                         guild.members.fetch(id)
                             .then(async (member) => {
                                 const oldRoles = Array.from(member.roles.cache.keys());
@@ -313,11 +330,16 @@ export default class Moderation {
 
                                                     this._eventBus.trigger('mod action', server, 'mute', interaction.guild.name, id, interaction.user.id, reason, expires);
                                                 
-                                                    if (i + 1 === servers.length) 
+                                                    if (i === 0) 
                                                         await interaction.reply({ content: `Muted user <@${id}> ${expires ? 'until ' + expires.toUTCString() : 'indefinitely'} with reason: ${reason}`, ephemeral: true });
                                                 }, [id, server, reason, expires]);
                                             })
                                             .catch(async error => {
+                                                if (error.code === 10007) { // => 'Unknown Member'
+                                                    // not in this server in the modnetwork, which is fine
+                                                    this._eventBus.trigger('mod action', server, 'mute', interaction.guild.name, id, interaction.user.id, reason, expires);
+                                                    return;
+                                                }
                                                 errored = true;
                                                 if (error.code === 50013) { // => 'Missing Permissions'
                                                     await interaction.reply({ content: `I can't mute <@${id}>; their permissions are too high.`, ephemeral: true });
@@ -326,6 +348,11 @@ export default class Moderation {
                                             });
                                     })
                                     .catch(async error => {
+                                        if (error.code === 10007) { // => 'Unknown Member'
+                                            // not in this server in the modnetwork, which is fine
+                                            this._eventBus.trigger('mod action', server, 'mute', interaction.guild.name, id, interaction.user.id, reason, expires);
+                                            return;
+                                        }
                                         errored = true;
                                         if (error.code === 50013) { // => 'Missing Permissions'
                                             await interaction.reply({ content: `I can't mute <@${id}>; their permissions are too high.`, ephemeral: true });
@@ -430,8 +457,6 @@ export default class Moderation {
             const server = servers[i];
             this._client.guilds.fetch(server)
                 .then(async guild => {
-                    const members = await guild.members.list()
-                    if (!members.has(id)) return;
                     guild.bans.create(id, { reason: expires ? reason + ' | Expires ' + expires : reason })
                         .then(async (res) => {
                             this._database.query('INSERT INTO Bans VALUES (?, ?, ?, ?)', async (error, results, fields) => {
@@ -449,16 +474,22 @@ export default class Moderation {
 
                                 this._eventBus.trigger('mod action', server, 'ban', interaction.guild.name, id, interaction.user.id, reason, expires);
 
-                                if (i + 1 === servers.length) 
+                                if (i === 0) 
                                     await interaction.reply({ content: `Banned user <@${id}> ${expires ? 'until ' + expires.toUTCString() : 'indefinitely'} with reason: ${reason}`, ephemeral: true });
                             }, [id, server, reason, expires]);
                         })
                         .catch(async (error) => {
+                            if (error.code === 10007) { // => 'Unknown Member'
+                                // not in this server in the modnetwork, which is fine
+                                this._eventBus.trigger('mod action', server, 'ban', interaction.guild.name, id, interaction.user.id, reason, expires);
+                                return;
+                            }
                             errored = true;
                             if (error.code === 50013) { // => 'Missing Permissions'
                                 await interaction.reply({ content: `I can't ban <@${id}>; their permissions are too high.`, ephemeral: true });
                                 return;
                             }
+                            
                             console.error(error);
                             await interaction.reply({ content: 'There was an error while attempting to ban the user', ephemeral: true });
                         });
@@ -484,8 +515,6 @@ export default class Moderation {
     kickHandler(origin, id, moderator, server, reason) {
         this._client.guilds.fetch(server)
             .then(async guild => {
-                const members = await guild.members.list()
-                if (!members.has(id)) return;
                 guild.members.fetch(id)
                     .then(member => {
                         member.kick(reason).catch(error => console.error)
