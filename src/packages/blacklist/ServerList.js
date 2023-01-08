@@ -90,10 +90,10 @@ export default class ServerList {
                         return;
                     }
 
-                    if (!results || results.length === 0) return;
-
-                    for (let result of results) {
-                        if (!this.has(result.regex)) this.blacklist.push(new RegExp(result.regex));
+                    if (!(!results || results.length === 0)) {
+                        for (let result of results) {
+                            if (!this.has(result.regex)) this.blacklist.push(new RegExp(result.regex));
+                        }
                     }
 
                     this._database.query(`SELECT blacklistLog FROM Servers WHERE id = '${this._id}';`, async (error, results, fields) => {

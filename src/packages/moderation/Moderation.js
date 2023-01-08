@@ -427,7 +427,9 @@ export default class Moderation {
             if (errored) return;
             const server = servers[i];
             this._client.guilds.fetch(server)
-                .then(guild => {
+                .then(async guild => {
+                    const members = await guild.members.list()
+                    if (!members.has(id)) return;
                     guild.bans.create(id, { reason: expires ? reason + ' | Expires ' + expires : reason })
                         .then(async (res) => {
                             this._database.query('INSERT INTO Bans VALUES (?, ?, ?, ?)', async (error, results, fields) => {
