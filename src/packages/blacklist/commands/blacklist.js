@@ -44,7 +44,6 @@ export const execute = async (interaction, eventBus, database) => {
         await interaction.reply({ content: 'Blacklist updated.' });
     } else if (interaction.options.getSubcommand() === 'query') {
         eventBus.trigger('blacklist query', interaction.guildId, async blacklist => {
-            console.log(blacklist)
             if (!blacklist || blacklist.length === 0) {
                 await interaction.reply({ content: 'This server has no blacklisted expressions' });
                 return;

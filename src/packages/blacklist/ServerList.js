@@ -163,7 +163,6 @@ export default class ServerList {
                 }
 
                 this.blacklist.push(new RegExp(regex));
-                console.log(this.blacklist)
             }, regex);
         }
     }

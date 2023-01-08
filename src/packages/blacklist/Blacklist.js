@@ -89,9 +89,9 @@ export default class Blacklist {
             for (let result of results) {
                 this._blacklist.set(result.id, new ServerList(this._client, this._database, result.id));
             }
-
-            this.setupHandlers();
         });
+
+        this.setupHandlers();
     }
 
     /**
