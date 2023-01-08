@@ -288,7 +288,9 @@ export default class Moderation {
                 muteRole = results[0].muteRole;
 
                 this._client.guilds.fetch(server)
-                    .then(guild => {
+                    .then(async guild => {
+                        const members = await guild.members.list()
+                        if (!members.has(id)) return;
                         guild.members.fetch(id)
                             .then(async (member) => {
                                 const oldRoles = Array.from(member.roles.cache.keys());
@@ -481,7 +483,9 @@ export default class Moderation {
      */
     kickHandler(origin, id, moderator, server, reason) {
         this._client.guilds.fetch(server)
-            .then(guild => {
+            .then(async guild => {
+                const members = await guild.members.list()
+                if (!members.has(id)) return;
                 guild.members.fetch(id)
                     .then(member => {
                         member.kick(reason).catch(error => console.error)
