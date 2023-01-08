@@ -140,11 +140,13 @@ export default class Oversight {
         const serverAddHandler = this.serverAddHandler.bind(this);
         const serverUpdateHandler = this.serverUpdateHandler.bind(this);
         const messageHandler = this.messageHandler.bind(this);
+        const leaderboardRequestHandler = this.leaderboardRequestHandler.bind(this);
 
         this._client.on(Events.MessageCreate, messageHandler);
 
         this._eventBus.on('new server', serverAddHandler);
         this._eventBus.on('pin update', serverUpdateHandler);
+        this._eventBus.on('pin leaderboard', leaderboardRequestHandler);
     }
 
     /**
@@ -319,6 +321,29 @@ export default class Oversight {
                     this._collectors.delete(id);
                 });
             }
+        });
+    }
+
+    /**
+     * Handles a request to get a server's pin leaderboard.
+     *
+     * @method leaderboardRequestHandler
+     * @param {String} id
+     * @param {Function} callback
+     */
+    leaderboardRequestHandler(id, callback) {
+        const server = this._servers.get(id);
+        if (!server || !server.canPin()) return callback(null);
+
+        this._database.query(`SELECT id, server, pins FROM Pins WHERE server = '${id}' ORDER BY pins DESC;`, (error, results, fields) => {
+            if (error) {
+                console.error(error);
+                return callback(null);
+            }
+
+            if (!results || results.length === 0) return callback(null);
+
+            callback(results);
         });
     }
 }

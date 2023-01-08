@@ -1,4 +1,4 @@
-import { ChannelType, EmbedBuilder, SlashCommandBuilder } from "discord.js";
+import { ChannelType, EmbedBuilder, PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
 
 export const data = new SlashCommandBuilder()
     .setName('pinboard')
@@ -57,7 +57,8 @@ export const data = new SlashCommandBuilder()
                             .setRequired(true);
                     });
             });
-    });
+    })
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
 
 export const execute = async (interaction, eventBus, database) => {
     switch (interaction.options.getSubcommand()) {

@@ -4,6 +4,7 @@
     "description": "Tracks the least funny people on the server",
     "main": "Pinboard.js",
     "commands": [
-        "pinboard"
+        "pinboard",
+        "pins"
     ]
 }
