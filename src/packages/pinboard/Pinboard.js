@@ -69,6 +69,15 @@ export default class Oversight {
         this._reactionHandler = null;
 
         /**
+         * Handler for a single reaction being removed
+         *
+         * @property _reactionRemoveHandler
+         * @type {Function}
+         * @private
+         */
+        this._reactionRemoveHandler = null;
+
+        /**
          * Handler for when a collection is complete
          *
          * @property _collectionDoneHandler
@@ -96,9 +105,9 @@ export default class Oversight {
                             (error, results, fields) => { if (error) return; });
         this._database.query('ALTER TABLE Servers ADD `pinEmoji` VARCHAR(50);',
                             (error, results, fields) => { if (error) return; });
-        this._database.query('ALTER TABLE Servers ADD `pinTimeout` VARCHAR(30);',
+        this._database.query('ALTER TABLE Servers ADD `pinTimeout` INT;',
                             (error, results, fields) => { if (error) return; });
-        this._database.query('ALTER TABLE Servers ADD `pinThreshold` VARCHAR(30);',
+        this._database.query('ALTER TABLE Servers ADD `pinThreshold` INT;',
                             (error, results, fields) => { if (error) return; });
         
         this._database.query('SELECT id, pinChannel, pinEmoji, pinTimeout, pinThreshold FROM Servers', (error, results, fields) => {
@@ -125,14 +134,17 @@ export default class Oversight {
      */
     setupHandlers() {
         this._reactionHandler = this.reactionHandler.bind(this);
+        this._reactionRemoveHandler = this.reactionRemoveHandler.bind(this);
         this._collectionDoneHandler = this.collectionDoneHandler.bind(this);
 
         const serverAddHandler = this.serverAddHandler.bind(this);
+        const serverUpdateHandler = this.serverUpdateHandler.bind(this);
         const messageHandler = this.messageHandler.bind(this);
 
         this._client.on(Events.MessageCreate, messageHandler);
 
         this._eventBus.on('new server', serverAddHandler);
+        this._eventBus.on('pin update', serverUpdateHandler);
     }
 
     /**
@@ -147,6 +159,23 @@ export default class Oversight {
     }
 
     /**
+     * Some property has been updated via commands
+     *
+     * @method serverUpdateHandler
+     * @param {String} id - the server updated
+     * @param {String} prop - the property
+     * @param {String} value - the value set
+     */
+    serverUpdateHandler(id, prop, value) {
+        if (!this._servers.has(id)) {
+            this.serverAddHandler(id);
+        }
+
+        const server = this._servers.get(id);
+        server[prop] = value;
+    }
+
+    /**
      * Handles message creation, sets up
      * a collector for the reactions
      *
@@ -157,13 +186,16 @@ export default class Oversight {
     messageHandler(message) {
         const server = this._servers.get(message.guildId);
         if (!server) return;
-        //if (!server.canPin()) return;
+        if (!server.canPin()) return;
 
-        const filter = (reaction, user) => true;
-        const collector = message.createReactionCollector({ filter, time: server.timeout * 60 * 1000 });
+        const filter = (reaction, user) => {
+            return reaction.emoji.name === server.emoji;
+        };
+        const collector = message.createReactionCollector({ filter, time: server.timeout * 60 * 1000, dispose: true });
         this._collectors.set(message.id, { collector: collector, author: message.author.id, pinned: false, entry: null });
 
-        collector.on('collect', (reaction) => console.log(reaction));
+        collector.on('collect', this._reactionHandler);
+        collector.on('remove', this._reactionRemoveHandler);
         collector.on('end', collected => {
             this._collectionDoneHandler(message.id, collected)
         });
@@ -177,11 +209,16 @@ export default class Oversight {
      * @param {User} user
      * @returns {void}
      */
-    reactionHandler(reaction, user) {
-        console.log(reaction)
+    reactionHandler(reaction, user, removal = false) {
         const server = this._servers.get(reaction.message.guildId);
         const message = this._collectors.get(reaction.message.id);
         if (!server) return;
+
+        if (!removal && user.id === reaction.message.author.id) {
+            reaction.message.channel.send({ content: ':no_entry_sign: <@' + user.id + '>, you can\'t pin your own messages!' });
+            reaction.remove();
+            return;
+        }
 
         if (reaction.count >= server.threshold) {
             if (!message.pinned) {
@@ -189,28 +226,43 @@ export default class Oversight {
                     .then(pinChannel => {
                         const embed = new EmbedBuilder()
                             .setAuthor({ name: 'Pinned Message', iconURL: reaction.message.author.displayAvatarURL() })
-                            .setFooter({ text: reaction.count + ' ' + reaction.emoji.name })
+                            .addFields(
+                                { name: 'Author', value: '<@' + reaction.message.author.id + '>', inline: true },
+                                { name: 'Channel', value: '<#' + reaction.message.channel.id + '>', inline: true },
+                                { name: 'Link', value: '[Jump!](' + reaction.message.url + ')' }
+                            )
+                            .setFooter({ text: reaction.emoji.name + ' ' + reaction.count })
                             .setTimestamp(reaction.message.createdTimestamp);
                         
-                        if (reaction.message.content) embed.setDescription(reaction.message.content);
-                        if (message.attachments.first())
-                            embed.setImage(message.attachments.first().proxyURL);
+                        if (reaction.message.content) {
+                            embed.setDescription(reaction.message.content);
+                        }
+
+                        if (reaction.message.attachments.first()) {
+                            embed.setImage(reaction.message.attachments.first().proxyURL);
+                        }
 
                         pinChannel.send({ embeds: [embed] })
                             .then(res => {
                                 message.entry = res;
                                 message.pinned = true;
-                            });
+                            })
+                            .catch(error => console.error);
                     })
                     .catch(error => console.error);
             } else {
                 const embed = new EmbedBuilder()
                     .setAuthor({ name: 'Pinned Message', iconURL: reaction.message.author.displayAvatarURL() })
-                    .setFooter({ text: reaction.count + ' ' + reaction.emoji.name })
+                    .addFields(
+                        { name: 'Author', value: '<@' + reaction.message.author.id + '>', inline: true },
+                        { name: 'Channel', value: '<#' + reaction.message.channel.id + '>', inline: true },
+                        { name: 'Link', value: '[Jump!](' + reaction.message.url + ')' }
+                    )
+                    .setFooter({ text: reaction.emoji.name + ' ' + reaction.count })
                     .setTimestamp(reaction.message.createdTimestamp);
     
                     if (reaction.message.content) embed.setDescription(reaction.message.content);
-                    if (message.attachments.first())
+                    if (reaction.message.attachments.first())
                         embed.setImage(message.attachments.first().proxyURL);
                 
                 message.entry.edit({ embeds: [embed] });
@@ -221,6 +273,17 @@ export default class Oversight {
             message.entry = null;
             message.pinned = false;
         }
+    }
+
+    /**
+     * Triggered when a reaction is removed
+     *
+     * @method reactionRemoveHandler
+     * @param {MessageReaction} reaction
+     * @param {User} user
+     */
+    reactionRemoveHandler(reaction, user) {
+        this.reactionHandler(reaction, user, true);
     }
 
     /**
@@ -238,7 +301,7 @@ export default class Oversight {
             return;
         }
 
-        this._database.query(`SELECT id, server FROM Pins WHERE id = '${message.author}' AND server = '${message.collector.channel.guildId}';`, (error, results, fields) => {
+        this._database.query(`SELECT id, server FROM Pins WHERE id = '${message.author}' AND server = '${message.collector.message.channel.guildId}';`, (error, results, fields) => {
             if (error) {
                 console.error(error);
                 return;
@@ -246,12 +309,12 @@ export default class Oversight {
 
             if (!results || results.length === 0) {
                 // the first message with pins for this user :)
-                this._database.query(`INSERT INTO Pins VALUES ('${message.author}', '${message.collector.channel.guildId}', '${collection.size}');`, (error, results, fields) => {
+                this._database.query(`INSERT INTO Pins VALUES ('${message.author}', '${message.collector.message.channel.guildId}', '${collection.size}');`, (error, results, fields) => {
                     if (error) console.error(error);
                     this._collectors.delete(id);
                 });
             } else {
-                this._database.query(`UPDATE Pins SET pins = pins + ${collection.size} WHERE id = '${message.author}' AND server = '${message.collector.channel.guildId}';`, (error, results, fields) => {
+                this._database.query(`UPDATE Pins SET pins = pins + ${collection.size} WHERE id = '${message.author}' AND server = '${message.collector.message.channel.guildId}';`, (error, results, fields) => {
                     if (error) console.error(error);
                     this._collectors.delete(id);
                 });
