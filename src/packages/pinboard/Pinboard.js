@@ -1,4 +1,4 @@
-import { Events, EmbedBuilder } from "discord.js";
+import { Events, EmbedBuilder, MessageType } from "discord.js";
 import Server from "./Server.js";
 
 /**
@@ -211,7 +211,7 @@ export default class Oversight {
      * @param {User} user
      * @returns {void}
      */
-    reactionHandler(reaction, user, removal = false) {
+    async reactionHandler(reaction, user, removal = false) {
         const server = this._servers.get(reaction.message.guildId);
         const message = this._collectors.get(reaction.message.id);
         if (!server) return;
@@ -225,7 +225,7 @@ export default class Oversight {
         if (reaction.count >= server.threshold) {
             if (!message.pinned) {
                 reaction.message.guild.channels.fetch(server.channel)
-                    .then(pinChannel => {
+                    .then(async pinChannel => {
                         const embed = new EmbedBuilder()
                             .setAuthor({ name: 'Pinned Message', iconURL: reaction.message.author.displayAvatarURL() })
                             .addFields(
@@ -242,6 +242,18 @@ export default class Oversight {
 
                         if (reaction.message.attachments.first()) {
                             embed.setImage(reaction.message.attachments.first().proxyURL);
+                        }
+
+                        if (reaction.message.type === MessageType.Reply) {
+                            let parent;
+                            try {
+                                parent = await reaction.message.channel.messages.fetch(reaction.message.reference.messageId);
+                            } catch (error) {
+                                console.error(error);
+                            }
+    
+                            if (parent.content)
+                                embed.addFields({ name: 'Replying to ' + parent.author.username + '...', value: parent.content });
                         }
 
                         pinChannel.send({ embeds: [embed] })
@@ -266,6 +278,18 @@ export default class Oversight {
                     if (reaction.message.content) embed.setDescription(reaction.message.content);
                     if (reaction.message.attachments.first())
                         embed.setImage(message.attachments.first().proxyURL);
+                    
+                    if (reaction.message.type === MessageType.Reply) {
+                        let parent;
+                        try {
+                            parent = await reaction.message.channel.messages.fetch(reaction.message.reference.messageId);
+                        } catch (error) {
+                            console.error(error);
+                        }
+
+                        if (parent.content)
+                            embed.addFields({ name: 'Replying to ' + parent.author.username + '...', value: parent.content });
+                    }
                 
                 message.entry.edit({ embeds: [embed] });
             }
