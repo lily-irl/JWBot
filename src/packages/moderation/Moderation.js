@@ -361,6 +361,11 @@ export default class Moderation {
                                     });
                             })
                             .catch(async (error) => {
+                                if (error.code === 10007) { // => 'Unknown Member'
+                                    // not in this server in the modnetwork, which is fine
+                                    this._eventBus.trigger('mod action', server, 'mute', interaction.guild.name, id, interaction.user.id, reason, expires);
+                                    return;
+                                }
                                 errored = true;
                                 console.error(error);
                                 await interaction.reply({ content: 'There was an error while attempting to mute the user', ephemeral: true });
