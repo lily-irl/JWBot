@@ -2,9 +2,9 @@ import { Events, EmbedBuilder, MessageType } from "discord.js";
 import Server from "./Server.js";
 
 /**
- * Oversight logs message edits and deletions.
+ * Pinboard maintains a leaderboard of pins.
  */
-export default class Oversight {
+export default class Pinboard {
     /**
      * 
      * @param {Client} client 
@@ -275,9 +275,13 @@ export default class Oversight {
                     .setFooter({ text: reaction.emoji.name + ' ' + reaction.count })
                     .setTimestamp(reaction.message.createdTimestamp);
     
-                    if (reaction.message.content) embed.setDescription(reaction.message.content);
-                    if (reaction.message.attachments.first())
-                        embed.setImage(message.attachments.first().proxyURL);
+                    if (reaction.message.content) {
+                        embed.setDescription(reaction.message.content);
+                    }
+
+                    if (reaction.message.attachments.first()) {
+                        embed.setImage(reaction.message.attachments.first().proxyURL);
+                    }
                     
                     if (reaction.message.type === MessageType.Reply) {
                         let parent;
@@ -335,12 +339,12 @@ export default class Oversight {
 
             if (!results || results.length === 0) {
                 // the first message with pins for this user :)
-                this._database.query(`INSERT INTO Pins VALUES ('${message.author}', '${message.collector.message.channel.guildId}', '${collection.size}');`, (error, results, fields) => {
+                this._database.query(`INSERT INTO Pins VALUES ('${message.author}', '${message.collector.message.channel.guildId}', '${collection.first().count}');`, (error, results, fields) => {
                     if (error) console.error(error);
                     this._collectors.delete(id);
                 });
             } else {
-                this._database.query(`UPDATE Pins SET pins = pins + ${collection.size} WHERE id = '${message.author}' AND server = '${message.collector.message.channel.guildId}';`, (error, results, fields) => {
+                this._database.query(`UPDATE Pins SET pins = pins + ${collection.first().count} WHERE id = '${message.author}' AND server = '${message.collector.message.channel.guildId}';`, (error, results, fields) => {
                     if (error) console.error(error);
                     this._collectors.delete(id);
                 });
