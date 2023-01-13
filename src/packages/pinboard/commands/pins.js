@@ -120,7 +120,7 @@ export const execute = async (interaction, eventBus, database) => {
             let emoji;
 
             if (index === 1) emoji = ':partying_face:';
-            else if (index > 50) emoji = ':cowboy:';
+            else if (index < 50) emoji = ':cowboy:';
             else emoji = ':pensive:';
             
             await interaction.reply({ content: emoji + ' <@' + interaction.user.id + '>, you\'re #' + index + ' with ' + count + ' pins.' }); 
