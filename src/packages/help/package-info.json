@@ -1,0 +1,9 @@
+{
+    "name": "Help",
+    "version": "1.0.0",
+    "description": "A command reference, accessible using /help",
+    "main": "Help.js",
+    "commands": [
+        "help"
+    ]
+}
