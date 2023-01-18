@@ -1,6 +1,6 @@
 {
   "name": "jwbot",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "a rewrite of JWBot, mhoc's moderation bot",
   "main": "src/index.js",
   "scripts": {

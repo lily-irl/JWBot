@@ -123,6 +123,9 @@ export default class Oversight {
     editHandler(oldMessage, newMessage) {
         if (oldMessage.author.id === this._client.user.id) return;
 
+        // check if this was just embeds populating
+        if (oldMessage.content && newMessage.content && oldMessage.content === newMessage.content && !oldMessage.embeds && newMessage.embeds) return;
+
         this._database.query(`SELECT messageLog FROM Servers WHERE id = '${newMessage.guildId}';`, async (error, results, fields) => {
             if (error) {
                 console.error(error);
