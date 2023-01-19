@@ -64,11 +64,20 @@ export const execute = async (interaction, eventBus, database) => {
                 .setLabel('>')
                 .setStyle(ButtonStyle.Primary)
                 .setDisabled(pins.length < first + 10);
-            const row = new ActionRowBuilder().addComponents(prevButton, nextButton);
+            const firstButton = new ButtonBuilder()
+                .setCustomId('pinboard-first')
+                .setLabel('<<')
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(true);
+            const lastButton = new ButtonBuilder()
+                .setCustomId('pinboard-last')
+                .setLabel('>>')
+                .setStyle(ButtonStyle.Primary)
+                .setDisabled(pins.length < first + 10);
+            const row = new ActionRowBuilder().addComponents(firstButton, prevButton, nextButton, lastButton);
             const message = await interaction.reply({ embeds: [initialEmbed], components: [row] });
             const collector = message.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60 * 1000 });
             collector.on('collect', i => {
-                console.log(i.component.label)
                 if (i.user.id !== interaction.user.id) {
                     i.reply({ content: 'Run `/pins leaderboard` to interact with your own leaderboard', ephemeral: true });
                     return;
@@ -77,6 +86,10 @@ export const execute = async (interaction, eventBus, database) => {
                     first -= 10;
                 } else if (i.component.customId === 'pinboard-next') {
                     first += 10;
+                } else if (i.component.customId === 'pinboard-first') {
+                    first = 0;
+                } else if (i.component.customId === 'pinboard-last') {
+                    first = 10 * (Math.ceil(pins.length / 10) - 1);
                 }
                 last = pins.length > first + 10 ? first + 10 : pins.length;
                 let nextEmbed = embed();
@@ -90,7 +103,17 @@ export const execute = async (interaction, eventBus, database) => {
                     .setLabel('>')
                     .setStyle(ButtonStyle.Primary)
                     .setDisabled(pins.length < first + 10);
-                let nextRow = new ActionRowBuilder().addComponents(nextPrev, nextNext);
+                let nextFirst = new ButtonBuilder()
+                    .setCustomId('pinboard-first')
+                    .setLabel('<<')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(first < 1);
+                let nextLast = new ButtonBuilder()
+                    .setCustomId('pinboard-last')
+                    .setLabel('>>')
+                    .setStyle(ButtonStyle.Primary)
+                    .setDisabled(pins.length < first + 10);
+                let nextRow = new ActionRowBuilder().addComponents(nextFirst, nextPrev, nextNext, nextLast);
                 
                 i.update({ embeds: [nextEmbed], components: [nextRow] });
             });
