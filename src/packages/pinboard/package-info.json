@@ -1,6 +1,6 @@
 {
     "name": "Pinboard",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "description": "Tracks the least funny people on the server",
     "main": "Pinboard.js",
     "commands": [

@@ -226,6 +226,18 @@ export default class Pinboard {
             if (!message.pinned) {
                 reaction.message.guild.channels.fetch(server.channel)
                     .then(async pinChannel => {
+                        const tempEmbed = new EmbedBuilder().setAuthor({ name: 'Loading pin...' });
+                        pinChannel.send({ embeds: [tempEmbed] })
+                            .then(res => {
+                                message.entry = res;
+                                message.pinned = true;
+                                this.reactionHandler(reaction, user, removal);
+                            });
+                    })
+                    .catch(error => console.error);
+            } else {
+                reaction.message.guild.channels.fetch(server.channel)
+                    .then(async pinChannel => {
                         const embed = new EmbedBuilder()
                             .setAuthor({ name: 'Pinned Message', iconURL: reaction.message.author.displayAvatarURL() })
                             .addFields(
@@ -235,7 +247,7 @@ export default class Pinboard {
                             )
                             .setFooter({ text: reaction.emoji.name + ' ' + reaction.count })
                             .setTimestamp(reaction.message.createdTimestamp);
-                        
+                            
                         if (reaction.message.content) {
                             embed.setDescription(reaction.message.content);
                         }
@@ -251,52 +263,15 @@ export default class Pinboard {
                             } catch (error) {
                                 console.error(error);
                             }
-    
+
                             if (parent.content)
                                 embed.addFields({ name: 'Replying to ' + parent.author.username + '...', value: parent.content });
                         }
-
-                        pinChannel.send({ embeds: [embed] })
-                            .then(res => {
-                                message.entry = res;
-                                message.pinned = true;
-                            })
+                        message.entry.edit({ embeds: [embed] })
                             .catch(error => console.error);
                     })
                     .catch(error => console.error);
-            } else {
-                const embed = new EmbedBuilder()
-                    .setAuthor({ name: 'Pinned Message', iconURL: reaction.message.author.displayAvatarURL() })
-                    .addFields(
-                        { name: 'Author', value: '<@' + reaction.message.author.id + '>', inline: true },
-                        { name: 'Channel', value: '<#' + reaction.message.channel.id + '>', inline: true },
-                        { name: 'Link', value: '[Jump!](' + reaction.message.url + ')' }
-                    )
-                    .setFooter({ text: reaction.emoji.name + ' ' + reaction.count })
-                    .setTimestamp(reaction.message.createdTimestamp);
-    
-                    if (reaction.message.content) {
-                        embed.setDescription(reaction.message.content);
-                    }
-
-                    if (reaction.message.attachments.first()) {
-                        embed.setImage(reaction.message.attachments.first().proxyURL);
-                    }
-                    
-                    if (reaction.message.type === MessageType.Reply) {
-                        let parent;
-                        try {
-                            parent = await reaction.message.channel.messages.fetch(reaction.message.reference.messageId);
-                        } catch (error) {
-                            console.error(error);
-                        }
-
-                        if (parent.content)
-                            embed.addFields({ name: 'Replying to ' + parent.author.username + '...', value: parent.content });
-                    }
-                
-                message.entry.edit({ embeds: [embed] });
-            }
+                }
         } else {
             if (!message.pinned) return;
             message.entry.delete();

@@ -86,6 +86,7 @@ export const execute = async (interaction, eventBus, database) => {
                 }
 
                 const result = results[0];
+                console.log(result)
 
                 if (!(result.pinChannel && result.pinEmoji && result.pinTimeout && result.pinThreshold)) {
                     embed.addFields({ name: 'Enabled', value: 'No' });
@@ -97,7 +98,7 @@ export const execute = async (interaction, eventBus, database) => {
                     { name: 'Channel', value: result.pinChannel ? '<#' + result.pinChannel + '>' : 'None' },
                     { name: 'Emoji', value: result.pinEmoji ?? 'None' },
                     { name: 'Timeout', value: result.pinTimeout ? result.pinTimeout + ' min' : 'None' },
-                    { name: 'Threshold', value: result.pinThreshold ?? 'None' }
+                    { name: 'Threshold', value: String(result.pinThreshold) ?? 'None' }
                 );
 
                 await interaction.reply({ embeds: [embed] });
