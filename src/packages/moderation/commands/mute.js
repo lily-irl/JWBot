@@ -17,7 +17,7 @@ export const data = new SlashCommandBuilder()
         return option.setName('reason')
             .setDescription('The reason this user is muted');
     })
-    .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers);
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers | PermissionFlagsBits.KickMembers);
 
 /**
  * 
