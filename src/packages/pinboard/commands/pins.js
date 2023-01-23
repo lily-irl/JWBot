@@ -76,7 +76,7 @@ export const execute = async (interaction, eventBus, database) => {
                 .setDisabled(pins.length < first + 10);
             const row = new ActionRowBuilder().addComponents(firstButton, prevButton, nextButton, lastButton);
             const message = await interaction.reply({ embeds: [initialEmbed], components: [row] });
-            const collector = message.createMessageComponentCollector({ componentType: ComponentType.Button, time: 60 * 1000 });
+            const collector = message.createMessageComponentCollector({ componentType: ComponentType.Button, time: 5 * 60 * 1000 });
             collector.on('collect', i => {
                 if (i.user.id !== interaction.user.id) {
                     i.reply({ content: 'Run `/pins leaderboard` to interact with your own leaderboard', ephemeral: true });
