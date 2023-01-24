@@ -666,14 +666,13 @@ export default class Moderation {
                 const guild = await this._client.guilds.fetch(server);
                 const channel = await guild.channels.fetch(results[0].modLog);
                 const user = await guild.members.fetch(target);
-                const mod = await guild.members.fetch(moderator);
                 if (!channel.isTextBased()) return;
 
                 const embed = new EmbedBuilder()
                     .setAuthor({ name: `[${action.toUpperCase()}] ${user.user.tag}`, iconURL: user.displayAvatarURL() })
                     .addFields(
                         { name: 'User', value: '<@' + user.id + '>' },
-                        { name: 'Moderator', value: '<@' + mod.id + '>' }
+                        { name: 'Moderator', value: '<@' + moderator + '>' }
                     );
 
                 switch (action) {
