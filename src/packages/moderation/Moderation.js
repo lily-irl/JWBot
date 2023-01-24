@@ -69,7 +69,7 @@ export default class Moderation {
 
         this._database.query('CREATE TABLE IF NOT EXISTS Bans (id VARCHAR(30) NOT NULL, server VARCHAR(30) NOT NULL, reason VARCHAR(1000), expires VARCHAR(30), CONSTRAINT PK_ban PRIMARY KEY (id, server));',
                             (error, results, fields) => { if (error) console.error(error); });
-        this._database.query('CREATE TABLE IF NOT EXISTS Mutes (id VARCHAR(30) NOT NULL, server VARCHAR(30) NOT NULL, reason VARCHAR(1000), expires VARCHAR(30), CONSTRAINT PK_mute PRIMARY KEY (id, server));',
+        this._database.query('CREATE TABLE IF NOT EXISTS Mutes (id VARCHAR(30) NOT NULL, server VARCHAR(30) NOT NULL, reason VARCHAR(1000), roles VARCHAR(10000), expires VARCHAR(30), CONSTRAINT PK_mute PRIMARY KEY (id, server));',
                             (error, results, fields) => { if (error) console.error(error); });
         // don't need to worry about IF NOT EXISTS for this one because if it does
         // it'll just fail and we can carry on
@@ -168,7 +168,7 @@ export default class Moderation {
      * @returns {void}
      */
     loadExistingMutes() {
-        this._database.query('SELECT id, server, reason, expires FROM Mutes;', async (error, results, fields) => {
+        this._database.query('SELECT id, server, reason, roles, expires FROM Mutes;', async (error, results, fields) => {
             if (error) console.error(error);
             if (!results || results.length === 0) return;
 
@@ -184,7 +184,11 @@ export default class Moderation {
                     continue;
                 }
 
-                let expires;
+                let expires, roles;
+
+                if (result.roles) {
+                    roles = result.roles.split(' ');
+                }
 
                 if (result.expires) {
                     expires = new Date(result.expires);
@@ -193,7 +197,7 @@ export default class Moderation {
                         // the mute has expired
                         this._punishments.push({
                             type: 'mute',
-                            punishment: new Mute(this._eventBus, result.id, result.server, result.reason)
+                            punishment: new Mute(this._eventBus, result.id, result.server, result.reason, null, roles ?? null)
                         });
 
                         this._eventBus.trigger('unmute', result.id, result.server);
@@ -203,7 +207,7 @@ export default class Moderation {
 
                 this._punishments.push({
                     type: 'mute',
-                    punishment: new Mute(this._eventBus, result.id, result.server, result.reason, expires ?? null)
+                    punishment: new Mute(this._eventBus, result.id, result.server, result.reason, expires ?? null, roles ?? null)
                 });
             }
         });
@@ -315,7 +319,12 @@ export default class Moderation {
                                     .then(async res => {
                                         res.roles.add(muteRole)
                                             .then(async res => {
-                                                this._database.query('INSERT INTO Mutes VALUES (?, ?, ?, ?)', async (error, results, fields) => {
+                                                let roleString = '';
+                                                for (let i = 0; i < oldRoles.length; i++) {
+                                                    roleString += oldRoles[i];
+                                                    if (i + 1 !== oldRoles.length) roleString += ' ';
+                                                }
+                                                this._database.query('INSERT INTO Mutes VALUES (?, ?, ?, ?, ?)', async (error, results, fields) => {
                                                     if (error) {
                                                         errored = true;
                                                         console.error(error);
@@ -332,7 +341,7 @@ export default class Moderation {
                                                 
                                                     if (i === 0) 
                                                         await interaction.reply({ content: `Muted user <@${id}> ${expires ? 'until ' + expires.toUTCString() : 'indefinitely'} with reason: ${reason}`, ephemeral: true });
-                                                }, [id, server, reason, expires]);
+                                                }, [id, server, reason, roleString, expires]);
                                             })
                                             .catch(async error => {
                                                 if (error.code === 10007) { // => 'Unknown Member'

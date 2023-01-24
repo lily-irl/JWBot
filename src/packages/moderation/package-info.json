@@ -1,6 +1,6 @@
 {
     "name": "Moderation",
-    "version": "1.0.0",
+    "version": "1.0.1",
     "description": "Moderation utilities for JWBot",
     "main": "Moderation.js",
     "commands": [
