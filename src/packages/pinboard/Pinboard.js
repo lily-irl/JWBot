@@ -224,18 +224,21 @@ export default class Pinboard {
 
         if (reaction.count >= server.threshold) {
             if (!message.pinned) {
+                message.pinned = true;
                 reaction.message.guild.channels.fetch(server.channel)
                     .then(async pinChannel => {
                         const tempEmbed = new EmbedBuilder().setAuthor({ name: 'Loading pin...' });
                         pinChannel.send({ embeds: [tempEmbed] })
                             .then(res => {
                                 message.entry = res;
-                                message.pinned = true;
                                 this.reactionHandler(reaction, user, removal);
                             });
                     })
                     .catch(error => console.error);
             } else {
+                while (!message.entry) {
+                    await new Promise(resolve => setTimeout(resolve, 100)); // await entry creation
+                }
                 reaction.message.guild.channels.fetch(server.channel)
                     .then(async pinChannel => {
                         const embed = new EmbedBuilder()
