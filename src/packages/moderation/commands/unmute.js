@@ -9,7 +9,7 @@ export const data = new SlashCommandBuilder()
             .setDescription('The user to be unmuted.')
             .setRequired(true);
     })
-    .setDefaultMemberPermissions(PermissionFlagsBits.MuteMembers);
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers | PermissionFlagsBits.KickMembers);
 
 export const execute = async (interaction, eventBus, database) => {
     const target = interaction.options.getUser('user');
