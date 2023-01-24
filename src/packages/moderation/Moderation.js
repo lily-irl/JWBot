@@ -315,7 +315,12 @@ export default class Moderation {
                         guild.members.fetch(id)
                             .then(async (member) => {
                                 const oldRoles = Array.from(member.roles.cache.keys());
-                                member.roles.remove(oldRoles.filter(id => id !== guild.roles.premiumSubscriberRole.id))
+                                member.roles.remove(oldRoles.filter(id => {
+                                    if (guild.roles.premiumSubscriberRole) {
+                                        return id !== guild.roles.premiumSubscriberRole.id;
+                                    }
+                                    return true;
+                                }))
                                     .then(async res => {
                                         res.roles.add(muteRole)
                                             .then(async res => {
