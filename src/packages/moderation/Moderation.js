@@ -573,7 +573,7 @@ export default class Moderation {
                                         if (error) console.log(error);
                                     })
                                     const muteRemoved = this._punishments.splice(this._punishments.indexOf(mute), 1);
-                                    muteRemoved[0].destroy()
+                                    muteRemoved[0].punishment.destroy()
                                     this._eventBus.trigger('mod action', server, 'unmute', null, id, this._client.user.id);
                                 })
                                 .catch(error => {
@@ -615,7 +615,7 @@ export default class Moderation {
 
                                 const ban = this._punishments.filter(p => p.type === 'ban' && p.punishment.id === id && p.punishment.server === server);
                                 this._punishments = this._punishments.splice(this._punishments.indexOf(ban), 1);
-                                ban.destroy();
+                                ban.punishment.destroy();
                                 this._eventBus.trigger('mod action', server, 'unban', null, id, this._client.user.id);
                             });
                         })
