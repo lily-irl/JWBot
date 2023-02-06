@@ -95,6 +95,18 @@ export default class Mute {
         }
     }
 
+    /**
+     * Destroys any scheduler job that exists
+     *
+     * @method destroy
+     * @returns {void}
+     */
+    destroy() {
+        if (this._job) {
+            this._job.cancel();
+        }
+    }
+
     // Getters and setters follow
     // Can't really be fucked doing the full documentation thing
 

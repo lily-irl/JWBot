@@ -572,7 +572,8 @@ export default class Moderation {
                                     this._database.query(`DELETE FROM Mutes WHERE id = '${id}' AND server = '${server}';`, (error, results, fields) => {
                                         if (error) console.log(error);
                                     })
-                                    this._punishments.splice(this._punishments.indexOf(mute), 1);
+                                    const muteRemoved = this._punishments.splice(this._punishments.indexOf(mute), 1);
+                                    muteRemoved[0].destroy()
                                     this._eventBus.trigger('mod action', server, 'unmute', null, id, this._client.user.id);
                                 })
                                 .catch(error => {
@@ -612,7 +613,9 @@ export default class Moderation {
                             this._database.query(`DELETE FROM Bans WHERE id = '${id}' AND server = '${server}';`, (error, results, fields) => {
                                 if (error) console.error(error);
 
-                                this._punishments = this._punishments.filter(p => !(p.type === 'ban' && p.punishment.id === id && p.punishment.server === server));
+                                const ban = this._punishments.filter(p => p.type === 'ban' && p.punishment.id === id && p.punishment.server === server);
+                                this._punishments = this._punishments.splice(this._punishments.indexOf(ban), 1);
+                                ban.destroy();
                                 this._eventBus.trigger('mod action', server, 'unban', null, id, this._client.user.id);
                             });
                         })
