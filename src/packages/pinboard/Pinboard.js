@@ -277,6 +277,9 @@ export default class Pinboard {
                 }
         } else {
             if (!message.pinned) return;
+            while (!message.entry) {
+                await new Promise(resolve => setTimeout(resolve, 100)); // await entry creation before we can delete it
+            }
             message.entry.delete();
             message.entry = null;
             message.pinned = false;
