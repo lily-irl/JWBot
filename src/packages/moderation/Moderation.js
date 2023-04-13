@@ -663,7 +663,7 @@ export default class Moderation {
                     return;
                 }
 
-                member.roles.set(results[0].muteRole);
+                member.roles.set([results[0].muteRole]);
             });
         }
     }
