@@ -97,6 +97,7 @@ export default class Moderation {
         const unmuteHandler = this.unmuteHandler.bind(this);
         const unbanHandler = this.unbanHandler.bind(this);
         const manualUnbanHandler = this.manualUnbanHandler.bind(this);
+        const muteRejoinHandler = this.muteRejoinHandler.bind(this);
         const logHandler = this.logHandler.bind(this);
 
         this._eventBus.on('mute', muteHandler);
@@ -107,6 +108,7 @@ export default class Moderation {
         this._eventBus.on('mod action', logHandler);
 
         this._client.on(Events.GuildBanRemove, manualUnbanHandler);
+        this._client.on(Events.GuildMemberAdd, muteRejoinHandler);
     }
 
     /**
@@ -637,6 +639,31 @@ export default class Moderation {
             this._database.query(`DELETE FROM Bans WHERE id = '${ban.user.id}' AND server = '${ban.guild.id}';`, (error, results, fields) => {
                 if (error) console.error(error);
                 this._punishments = this._punishments.filter(p => !(p.type === 'ban' && p.punishment.id === ban.user.id && p.punishment.server === ban.guild.id));
+            });
+        }
+    }
+
+    /**
+     * Handles a muted user leaving and rejoining a server.
+     *
+     * @method muteRejoinHandler
+     * @param {GuildMember} member - the user
+     */
+    muteRejoinHandler(member) {
+        const matching = this._punishments.filter(p => p.type === 'mute' && p.punishment.id === member.id && p.punishment.server === member.guild.id);
+        if (matching.length > 0) {
+            this._database.query(`SELECT muteRole FROM Servers WHERE id = '${member.guild.id}';`, async (error, results, fields) => {
+                if (error) {
+                    console.error(error);
+                    return;
+                }
+
+                if (!results || results.length === 0 || !results[0].muteRole) {
+                    console.log('server ' + server + ' has no mute role set up');
+                    return;
+                }
+
+                member.roles.set([results[0].muteRole]);
             });
         }
     }
