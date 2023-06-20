@@ -216,6 +216,8 @@ export default class ServerList {
                 );
             
             this._channel.send({ embeds: [embed] });
+
+            message.delete();
         }
     }
 }
