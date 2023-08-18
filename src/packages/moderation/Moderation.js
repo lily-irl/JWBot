@@ -699,7 +699,7 @@ export default class Moderation {
                 if (!channel.isTextBased()) return;
 
                 const embed = new EmbedBuilder()
-                    .setAuthor({ name: `[${action.toUpperCase()}] ${user.user.tag}`, iconURL: user.displayAvatarURL() })
+                    .setAuthor({ name: `[${action.toUpperCase()}] ${user.user.username}`, iconURL: user.displayAvatarURL() })
                     .addFields(
                         { name: 'User', value: '<@' + user.id + '>' },
                         { name: 'Moderator', value: '<@' + moderator + '>' }
