@@ -9,6 +9,7 @@
         "muterole",
         "unmute",
         "kick",
+        "warn",
         "modlog"
     ]
 }
