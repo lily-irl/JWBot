@@ -98,6 +98,7 @@ export default class Moderation {
         const unbanHandler = this.unbanHandler.bind(this);
         const manualUnbanHandler = this.manualUnbanHandler.bind(this);
         const muteRejoinHandler = this.muteRejoinHandler.bind(this);
+        const warnHandler = this.warnHandler.bind(this);
         const logHandler = this.logHandler.bind(this);
 
         this._eventBus.on('mute', muteHandler);
@@ -105,6 +106,7 @@ export default class Moderation {
         this._eventBus.on('kick', kickHandler);
         this._eventBus.on('unban', unbanHandler);
         this._eventBus.on('unmute', unmuteHandler);
+        this._eventBus.on('warn', warnHandler);
         this._eventBus.on('mod action', logHandler);
 
         this._client.on(Events.GuildBanRemove, manualUnbanHandler);
@@ -669,6 +671,21 @@ export default class Moderation {
     }
 
     /**
+     * Handles a warning. Expects the warning information.
+     *
+     * @method warnHandler
+     * @param {CommandInteraction} interaction
+     * @param {GuildMember} target - the person warned
+     * @param {String} reason - the reason this person is warned
+     */
+    async warnHandler(interaction, target, reason) {
+        // this is a semi useless wrapper function i could've just triggered mod action in warn.js tbh
+        this._eventBus.trigger('mod action', interaction.guildId, 'warn', null, target.id, interaction.user.id);
+        await interaction.reply({ content: `Warned <@${target.id}> for ${reason}.`, ephemeral: true });
+        return;
+    }
+
+    /**
      * Logs all moderation actions to the modLog channel.
      *
      * @method logHandler
@@ -732,6 +749,10 @@ export default class Moderation {
                             { name: 'Originating Server', value: origin }
                         )
                         .setColor('#ff0000');
+                        break;
+                    case 'warn':
+                        embed.addFields({ name: "Reason", value: reason })
+                            .setColor('#ffa500')
                         break;
                     case 'unmute':
                     case 'unban':
