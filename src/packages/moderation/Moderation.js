@@ -681,7 +681,7 @@ export default class Moderation {
     async warnHandler(interaction, target, reason) {
         // this is a semi useless wrapper function i could've just triggered mod action in warn.js tbh
         this._eventBus.trigger('mod action', interaction.guildId, 'warn', null, target.id, interaction.user.id, reason);
-        await interaction.reply({ content: `Warned <@${target.id}> for ${reason}.`, ephemeral: true });
+        await interaction.reply({ content: `Warned <@${target.id}> for ${reason}.`, ephemeral: false });
         return;
     }
 
