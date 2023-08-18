@@ -97,7 +97,7 @@ export default class Oversight {
             }
 
             const embed = new EmbedBuilder()
-                .setAuthor({ name: `[DELETE] ${message.author.tag}`, iconURL: message.author.displayAvatarURL() })
+                .setAuthor({ name: `[DELETE] ${message.author.username}`, iconURL: message.author.displayAvatarURL() })
                 .setColor('#ff0000')
                 .addFields({ name: 'Channel', value: '<#' + message.channel.id + '>' });
 
@@ -144,7 +144,7 @@ export default class Oversight {
             }
 
             const embed = new EmbedBuilder()
-                .setAuthor({ name: `[EDIT] ${newMessage.author.tag}`, iconURL: newMessage.author.displayAvatarURL() })
+                .setAuthor({ name: `[EDIT] ${newMessage.author.username}`, iconURL: newMessage.author.displayAvatarURL() })
                 .setColor('#0000ff')
                 .addFields({ name: 'Channel', value: '<#' + newMessage.channel.id + '>' });
 

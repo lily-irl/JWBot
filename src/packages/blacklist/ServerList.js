@@ -207,7 +207,7 @@ export default class ServerList {
 
         if (this.test(contents)) {
             const embed = new EmbedBuilder()
-                .setAuthor({ name: `[BLACKLIST] ${user.tag}`, iconURL: user.displayAvatarURL() })
+                .setAuthor({ name: `[BLACKLIST] ${user.username}`, iconURL: user.displayAvatarURL() })
                 .setColor('#ff0000')
                 .addFields(
                     { name: 'Author', value: '<@' + user.id + '>' },

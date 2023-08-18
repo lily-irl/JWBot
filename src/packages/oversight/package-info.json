@@ -1,6 +1,6 @@
 {
     "name": "Oversight",
-    "version": "1.0.1",
+    "version": "1.0.2",
     "description": "1984 was a warning, not a manual",
     "main": "Oversight.js",
     "commands": [
