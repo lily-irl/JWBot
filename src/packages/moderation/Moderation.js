@@ -680,7 +680,7 @@ export default class Moderation {
      */
     async warnHandler(interaction, target, reason) {
         // this is a semi useless wrapper function i could've just triggered mod action in warn.js tbh
-        this._eventBus.trigger('mod action', interaction.guildId, 'warn', null, target.id, interaction.user.id);
+        this._eventBus.trigger('mod action', interaction.guildId, 'warn', null, target.id, interaction.user.id, reason);
         await interaction.reply({ content: `Warned <@${target.id}> for ${reason}.`, ephemeral: true });
         return;
     }
@@ -751,7 +751,7 @@ export default class Moderation {
                         .setColor('#ff0000');
                         break;
                     case 'warn':
-                        embed.addFields({ name: "Reason", value: reason })
+                        embed.addFields({ name: 'Reason', value: reason })
                             .setColor('#ffa500')
                         break;
                     case 'unmute':
