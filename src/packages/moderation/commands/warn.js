@@ -14,7 +14,7 @@ export const data = new SlashCommandBuilder()
             .setDescription('The reason to warn this user')
             .setRequired(true);
     })
-    .setDefaultMemberPermissions(PermissionFlagsBits.ModerateMembers);
+    .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers | PermissionFlagsBits.KickMembers);
 
 /**
  * 
