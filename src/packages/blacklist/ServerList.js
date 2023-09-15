@@ -92,7 +92,7 @@ export default class ServerList {
 
                     if (!(!results || results.length === 0)) {
                         for (let result of results) {
-                            if (!this.has(result.regex)) this.blacklist.push(new RegExp(result.regex));
+                            if (!this.has(result.regex)) this.blacklist.push(new RegExp(result.regex, 'i'));
                         }
                     }
 
@@ -138,7 +138,7 @@ export default class ServerList {
      * @returns {Boolean}
      */
     has(regex) {
-        const test = new RegExp(regex);
+        const test = new RegExp(regex, 'i');
 
         for (let pattern of this.blacklist) {
             if (pattern.toString() === test.toString()) return true;
@@ -162,7 +162,7 @@ export default class ServerList {
                     return;
                 }
 
-                this.blacklist.push(new RegExp(regex));
+                this.blacklist.push(new RegExp(regex, 'i'));
             }, regex);
         }
     }
