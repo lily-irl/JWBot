@@ -127,6 +127,7 @@ export default class ServerList {
      * @returns {Boolean}
      */
     test(string) {
+        string = string.normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
         return this.blacklist.some(regex => regex.test(string));
     }
 

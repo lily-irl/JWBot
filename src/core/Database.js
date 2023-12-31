@@ -1,5 +1,5 @@
 import { default as config } from "../../credentials.json" assert { type: 'json' };
-import mysql from "mysql";
+import mysql from "mysql2";
 /**
  * Represents the database to the bot.
  */

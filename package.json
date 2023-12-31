@@ -1,6 +1,6 @@
 {
   "name": "jwbot",
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "a rewrite of JWBot, mhoc's moderation bot",
   "main": "src/index.js",
   "scripts": {
@@ -19,7 +19,7 @@
   "homepage": "https://github.com/lily-irl/JWBot#readme",
   "dependencies": {
     "discord.js": "^14.11.0",
-    "mysql": "^2.18.1",
+    "mysql2": "^3.6.5",
     "node-schedule": "^2.1.0",
     "timespan-parser": "^1.2.0"
   },
