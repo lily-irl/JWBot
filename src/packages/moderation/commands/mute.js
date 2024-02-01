@@ -21,12 +21,12 @@ export const data = new SlashCommandBuilder()
             .setRequired(true);
     })
     .addStringOption(option => {
-        return option.setName('duration')
-            .setDescription('The amount of time the user should be muted, if temporary');
+        return option.setName('reason')
+            .setDescription('The specific reason this user is muted');
     })
     .addStringOption(option => {
-        return option.setName('reason')
-            .setDescription('The reason this user is muted');
+        return option.setName('duration')
+            .setDescription('The amount of time the user should be muted, if temporary');
     })
     .setDefaultMemberPermissions(PermissionFlagsBits.BanMembers | PermissionFlagsBits.KickMembers);
 
