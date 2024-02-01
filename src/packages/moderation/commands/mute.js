@@ -10,10 +10,6 @@ export const data = new SlashCommandBuilder()
             .setRequired(true);
     })
     .addStringOption(option => {
-        return option.setName('duration')
-            .setDescription('The amount of time the user should be muted, if temporary');
-    })
-    .addStringOption(option => {
         return option.setName('violation')
             .setDescription('The rule that this user has violated')
             .addChoices(
@@ -23,6 +19,10 @@ export const data = new SlashCommandBuilder()
                 { name: 'Other', value: 'other' }
             )
             .setRequired(true);
+    })
+    .addStringOption(option => {
+        return option.setName('duration')
+            .setDescription('The amount of time the user should be muted, if temporary');
     })
     .addStringOption(option => {
         return option.setName('reason')
