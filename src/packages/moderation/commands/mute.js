@@ -14,6 +14,17 @@ export const data = new SlashCommandBuilder()
             .setDescription('The amount of time the user should be muted, if temporary');
     })
     .addStringOption(option => {
+        return option.setName('violation')
+            .setDescription('The rule that this user has violated')
+            .addChoices(
+                { name: 'Rule 1 - no spam', value: 'Rule 1 - no spam' },
+                { name: 'Rule 2 - no NSFW content', value: 'Rule 2 - no NSFW content' },
+                { name: 'Rule 3 - be respectful and tolerant towards others', value: 'Rule 2 - be respectful and tolerant towards others' },
+                { name: 'Other', value: 'other' }
+            )
+            .setRequired(true);
+    })
+    .addStringOption(option => {
         return option.setName('reason')
             .setDescription('The reason this user is muted');
     })
@@ -27,9 +38,17 @@ export const data = new SlashCommandBuilder()
  */
 export const execute = async (interaction, eventBus, database) => {
     const target = interaction.options.getUser('user');
-    const reason = interaction.options.getString('reason') ?? 'No reason provided.';
+    let reason;
     let duration = interaction.options.getString('duration') ?? 0;
     let expires = null;
+
+    if (interaction.options.getString('violation') === 'other')
+        reason = interaction.options.getString('reason') ?? 'No reason provided.';
+    else {
+        reason = interaction.options.getString('violation');
+        if (interaction.options.getString('reason'))
+            reason += '\n' + interaction.options.getString('reason');
+    }
 
     if (duration !== 0) {
         try {
