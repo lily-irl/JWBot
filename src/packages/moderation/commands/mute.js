@@ -15,7 +15,7 @@ export const data = new SlashCommandBuilder()
             .addChoices(
                 { name: 'Rule 1 - no spam', value: 'Rule 1 - no spam' },
                 { name: 'Rule 2 - no NSFW content', value: 'Rule 2 - no NSFW content' },
-                { name: 'Rule 3 - be respectful and tolerant towards others', value: 'Rule 2 - be respectful and tolerant towards others' },
+                { name: 'Rule 3 - be respectful and tolerant towards others', value: 'Rule 3 - be respectful and tolerant towards others' },
                 { name: 'Other', value: 'other' }
             )
             .setRequired(true);
