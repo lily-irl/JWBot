@@ -21,7 +21,8 @@
     "discord.js": "^14.11.0",
     "mysql2": "^3.6.5",
     "node-schedule": "^2.1.0",
-    "timespan-parser": "^1.2.0"
+    "timespan-parser": "^1.2.0",
+    "unidecode": "^0.1.8"
   },
   "type": "module"
 }

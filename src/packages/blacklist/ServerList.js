@@ -1,4 +1,5 @@
 import { EmbedBuilder } from "discord.js";
+import unidecode from "unidecode";
 
 /**
  * A server-specific blacklist of words.
@@ -127,7 +128,7 @@ export default class ServerList {
      * @returns {Boolean}
      */
     test(string) {
-        string = string.normalize('NFKD').replace(/[\u0300-\u036f]/g, '')
+        string = unidecode(string.normalize('NFKD').replace(/[\u0300-\u036f]/g, ''))
         return this.blacklist.some(regex => regex.test(string));
     }
 
