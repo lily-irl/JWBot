@@ -23,6 +23,6 @@ export const execute = async (interaction, eventBus, database) => {
     })
     .then(res => {
         if (!res) return;
-        return interaction.reply({ content: ':white_check_mark: Posted results for **' + name + '**.' });
+        return interaction.reply({ content: ':white_check_mark: Passed your message.' });
     })
 };
