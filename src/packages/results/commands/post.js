@@ -75,7 +75,7 @@ export const execute = async (interaction, eventBus, database) => {
 // only for the constituency
 export const autocomplete = async (interaction) => {
     const focusedValue = interaction.options.getFocused();
-	const choices = [
+    const choices = [
         'Northumbria and Durham',
         'North and East Yorkshire',
         'West Yorkshire',
@@ -112,8 +112,13 @@ export const autocomplete = async (interaction) => {
         'Belfast',
         'Northern Ireland'
     ];
-	const filtered = choices.filter(choice => choice.startsWith(focusedValue));
-	await interaction.respond(
-		filtered.map(choice => ({ name: choice, value: choice })),
-	);
+    const filtered = choices.filter(choice => choice.toLowerCase().startsWith(focusedValue));
+
+    if (filtered.length > 25) {
+        await interaction.respond([]);
+    } else {
+        await interaction.respond(
+            filtered.map(choice => ({ name: choice, value: choice })),
+        );
+    }
 }
