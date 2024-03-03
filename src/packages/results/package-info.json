@@ -1,0 +1,10 @@
+{
+    "name": "Results",
+    "version": "1.0.0",
+    "description": "Posts GEXXI results in #election-results",
+    "main": "Results.js",
+    "commands": [
+        "post",
+        "say"
+    ]
+}
