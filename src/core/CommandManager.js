@@ -136,9 +136,9 @@ export default class CommandManager {
                 await interaction.reply({ content: 'There was an internal error while executing this command', ephemeral: true });
             }
         } else if (interaction.isAutocomplete()) {
-            const command = interaction.client.commands.get(interaction.commandName);
+            const command = this._commands.get(interaction.commandName);
 
-		    if (!command) {
+            if (!command) {
 			    console.error(`No command matching ${interaction.commandName} was found.`);
 			    return;
 		    }
