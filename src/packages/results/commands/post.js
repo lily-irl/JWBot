@@ -12,7 +12,8 @@ export const data = new SlashCommandBuilder()
                 return option
                     .setName('name')
                     .setDescription('The name of the constituency')
-                    .setAutocomplete(true);
+                    .setAutocomplete(true)
+                    .setRequired(true);
         });
     })
     .addSubcommand(subcommand => {
@@ -36,7 +37,8 @@ export const data = new SlashCommandBuilder()
                         { name: 'Wales', value: 'Wales' },
                         { name: 'Northern Ireland', value: 'Northern Ireland' },
                         { name: 'Overall (total national results)', value: 'Overall' }
-                    );
+                    )
+                    .setRequired(true);
             });
     })
     .setDefaultMemberPermissions(PermissionFlagsBits.Administrator);
