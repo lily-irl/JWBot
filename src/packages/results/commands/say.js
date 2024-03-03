@@ -1,4 +1,5 @@
 import { PermissionFlagsBits, SlashCommandBuilder } from "discord.js";
+import axios from "axios";
 
 export const data = new SlashCommandBuilder()
     .setName('say')
