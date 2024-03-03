@@ -108,32 +108,46 @@ export default class CommandManager {
      * @async
      */
     async _handleInteraction(interaction) {
-        if (!interaction.isChatInputCommand()) return;
+        if (interaction.isChatInputCommand()) {
         
-        const command = this._commands.get(interaction.commandName);
+            const command = this._commands.get(interaction.commandName);
 
-        // Ensure there's a database entry for this server
-        this._database.query(`SELECT id FROM Servers WHERE id = '${interaction.guildId}'`, (error, results, fields) => {
-            if (error) console.error(error);
+            // Ensure there's a database entry for this server
+            this._database.query(`SELECT id FROM Servers WHERE id = '${interaction.guildId}'`, (error, results, fields) => {
+                if (error) console.error(error);
 
-            if (results.length === 0) {
-                this._database.query('INSERT INTO Servers (id) VALUES (?)', (error, results, fields) => {
-                    if (error) return console.error(error);
-                    this._eventBus.trigger('new server', interaction.guildId);
-                }, interaction.guildId);
+                if (results.length === 0) {
+                    this._database.query('INSERT INTO Servers (id) VALUES (?)', (error, results, fields) => {
+                        if (error) return console.error(error);
+                        this._eventBus.trigger('new server', interaction.guildId);
+                    }, interaction.guildId);
+                }
+            });
+
+            if (!command) {
+                console.error(`No command matching ${interaction.commandName} was found.`);
+		        return;
             }
-        });
 
-        if (!command) {
-            console.error(`No command matching ${interaction.commandName} was found.`);
-		    return;
-        }
+            try {
+                await command.execute(interaction, this._eventBus, this._database);
+            } catch (err) {
+                console.error(err);
+                await interaction.reply({ content: 'There was an internal error while executing this command', ephemeral: true });
+            }
+        } else if (interaction.isAutocomplete()) {
+            const command = interaction.client.commands.get(interaction.commandName);
 
-        try {
-            await command.execute(interaction, this._eventBus, this._database);
-        } catch (err) {
-            console.error(err);
-            await interaction.reply({ content: 'There was an internal error while executing this command', ephemeral: true });
+		    if (!command) {
+			    console.error(`No command matching ${interaction.commandName} was found.`);
+			    return;
+		    }
+
+		    try {
+			    await command.autocomplete(interaction);
+		    } catch (error) {
+			    console.error(error);
+		    }
         }
     }
 

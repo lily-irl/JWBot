@@ -12,43 +12,7 @@ export const data = new SlashCommandBuilder()
                 return option
                     .setName('name')
                     .setDescription('The name of the constituency')
-                    .addChoices(
-                        { name: 'Northumbria and Durham', value: 'Northumbria and Durham' },
-                        { name: 'North and East Yorkshire', value: 'North and East Yorkshire' },
-                        { name: 'West Yorkshire', value: 'West Yorkshire' },
-                        { name: 'South Yorkshire and Wakefield', value: 'South Yorkshire and Wakefield' },
-                        { name: 'Lancashire and Cumbria', value: 'Lancashire and Cumbria' },
-                        { name: 'Merseyside', value: 'Merseyside' },
-                        { name: 'Cheshire and Manchester South', value: 'Cheshire and Manchester South' },
-                        { name: 'Manchester North', value: 'Manchester North' },
-                        { name: 'Birmingham and Black Country', value: 'Birmingham and Black Country' },
-                        { name: 'Shropshire and Staffordshire', value: 'Shropshire and Staffordshire' },
-                        { name: 'Upper Severn', value: 'Upper Severn' },
-                        { name: 'Derbyshire and Nottinghamshire', value: 'Derbyshire and Nottinghamshire' },
-                        { name: 'Lincolnshire', value: 'Lincolnshire' },
-                        { name: 'Leicestershire and Northamptonshire', value: 'Leicestershire and Northamptonshire' },
-                        { name: 'Norfolk, Suffolk and Cambridge', value: 'Norfolk, Suffolk and Cambridge' },
-                        { name: 'Bedfordshire, Hertfordshire and Huntingdonshire', value: 'Bedfordshire, Hertfordshire and Huntingdonshire' },
-                        { name: 'Essex', value: 'Essex' },
-                        { name: 'East London', value: 'East London' },
-                        { name: 'Central London', value: 'Central London' },
-                        { name: 'South London', value: 'South London' },
-                        { name: 'North and West London', value: 'North and West London' },
-                        { name: 'Thames Valley', value: 'Thames Valley' },
-                        { name: 'Hampshire and West Surrey', value: 'Hampshire and West Surrey' },
-                        { name: 'Sussex and East Surrey', value: 'Sussex and East Surrey' },
-                        { name: 'Kent', value: 'Kent' },
-                        { name: 'Cornwall and Devon', value: 'Cornwall and Devon' },
-                        { name: 'Dorset, Wiltshire and Somerset South', value: 'Dorset, Wiltshire and Somerset South' },
-                        { name: 'Avon and Gloucestershire', value: 'Avon and Gloucestershire' },
-                        { name: 'Highland, Grampian and Fife', value: 'Highland, Grampian and Fife' },
-                        { name: 'Edinburgh and Borders', value: 'Edinburgh and Borders' },
-                        { name: 'Clydeside', value: 'Clydeside' },
-                        { name: 'Mid and North Wales', value: 'Mid and North Wales' },
-                        { name: 'Glamorgan and Gwent', value: 'Glamorgan and Gwent' },
-                        { name: 'Belfast', value: 'Belfast' },
-                        { name: 'Northern Ireland', value: 'Northern Ireland' }
-                );
+                    .setAutocomplete(true);
         });
     })
     .addSubcommand(subcommand => {
@@ -104,4 +68,50 @@ export const execute = async (interaction, eventBus, database) => {
             return interaction.reply({ content: ':white_check_mark: Posted results for **' + name + '**.' });
         })
     }
+}
+
+// only for the constituency
+export const autocomplete = async (interaction) => {
+    const focusedValue = interaction.options.getFocused();
+	const choices = [
+        'Northumbria and Durham',
+        'North and East Yorkshire',
+        'West Yorkshire',
+        'South Yorkshire and Wakefield',
+        'Lancashire and Cumbria',
+        'Merseyside',
+        'Cheshire and Manchester South',
+        'Manchester North',
+        'Birmingham and Black Country',
+        'Shropshire and Staffordshire',
+        'Upper Severn',
+        'Derbyshire and Nottinghamshire',
+        'Lincolnshire',
+        'Leicestershire and Northamptonshire',
+        'Norfolk, Suffolk and Cambridge',
+        'Bedfordshire, Hertfordshire and Huntingdonshire',
+        'Essex',
+        'East London',
+        'Central London',
+        'South London',
+        'North and West London',
+        'Thames Valley',
+        'Hampshire and West Surrey',
+        'Sussex and East Surrey',
+        'Kent',
+        'Cornwall and Devon',
+        'Dorset, Wiltshire and Somerset South',
+        'Avon and Gloucestershire',
+        'Highland, Grampian and Fife',
+        'Edinburgh and Borders',
+        'Clydeside',
+        'Mid and North Wales',
+        'Glamorgan and Gwent',
+        'Belfast',
+        'Northern Ireland'
+    ];
+	const filtered = choices.filter(choice => choice.startsWith(focusedValue));
+	await interaction.respond(
+		filtered.map(choice => ({ name: choice, value: choice })),
+	);
 }
